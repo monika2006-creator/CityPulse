@@ -47,10 +47,21 @@ export function detectSmartNotifications(prevState, nextState, settings, existin
   const prevRoutes = prevState.routes || [];
   const nextRoutes = nextState.routes || [];
   const prevRouteMap = new Map(prevRoutes.map((r) => [r.id, r]));
+  const previousFastest = [...prevRoutes].filter((r) => Number.isFinite(r.currentTravelTime)).sort((a, b) => a.currentTravelTime - b.currentTravelTime)[0];
+  const trackedRouteId = settings.trackedRouteId || previousFastest?.id;
+  const previousTrackedRoute = prevRouteMap.get(trackedRouteId);
+  const currentTrackedRoute = nextRoutes.find((r) => r.id === trackedRouteId);
+  const bestAlternative = nextRoutes.filter((r) => r.id !== trackedRouteId && Number.isFinite(r.currentTravelTime)).sort((a, b) => a.currentTravelTime - b.currentTravelTime)[0];
+  const alternativeSaving = currentTrackedRoute && bestAlternative ? currentTrackedRoute.currentTravelTime - bestAlternative.currentTravelTime : 0;
+  const previousAlternative = bestAlternative ? prevRouteMap.get(bestAlternative.id) : null;
+  const trackedRouteWorsened = Boolean(previousTrackedRoute && currentTrackedRoute && currentTrackedRoute.currentTravelTime > previousTrackedRoute.currentTravelTime);
+  const alternativeImproved = Boolean(previousAlternative && bestAlternative && bestAlternative.currentTravelTime < previousAlternative.currentTravelTime);
+  const hasFasterAlternative = settings.routeDelayAlerts && alternativeSaving >= delayThreshold && (trackedRouteWorsened || alternativeImproved);
 
   // 1. ROUTE DELAY INCREASED
   if (settings.routeDelayAlerts) {
     for (const route of nextRoutes) {
+      if (hasFasterAlternative && route.id === trackedRouteId) continue;
       const prev = prevRouteMap.get(route.id);
       if (prev && Number.isFinite(route.currentTravelTime) && Number.isFinite(prev.currentTravelTime)) {
         const diff = route.currentTravelTime - prev.currentTravelTime;
@@ -81,41 +92,19 @@ export function detectSmartNotifications(prevState, nextState, settings, existin
       }
     }
 
-    // 2. FASTER ALTERNATIVE AVAILABLE
-    // Check if the fastest route changed or is substantially faster than the corridor average
-    if (nextRoutes.length >= 2) {
-      const sortedCurrent = [...nextRoutes].filter((r) => Number.isFinite(r.currentTravelTime))
-        .sort((a, b) => a.currentTravelTime - b.currentTravelTime);
-      const fastest = sortedCurrent[0];
-      const slowest = sortedCurrent[sortedCurrent.length - 1];
-
-      if (fastest && slowest) {
-        const saving = slowest.currentTravelTime - fastest.currentTravelTime;
-        // Trigger if there is a meaningful saving and fastest route is significantly ahead
-        if (saving >= delayThreshold) {
-          const id = `route-faster:${fastest.id}:${fastest.currentTravelTime}`;
-          const sev = "attention";
-          if (!existingIds.has(id) && satisfiesMinSeverity(sev, minSev)) {
-            newNotifications.push({
-              id,
-              category: "routes",
-              severity: sev,
-              title: "Faster route available",
-              description: `${fastest.name} is currently ${saving} minutes faster than slower alternatives.`,
-              location: currentCity,
-              routeId: fastest.id,
-              timestamp,
-              createdAt: now.toISOString(),
-              isRead: false,
-              action: {
-                label: "View Route",
-                page: "route-intelligence",
-                routeId: fastest.id,
-              },
-            });
-            existingIds.add(id);
-          }
-        }
+    // Compare against the route the user is tracking (or the previous fastest route).
+    if (hasFasterAlternative && currentTrackedRoute && bestAlternative) {
+      const id = `route-faster:${trackedRouteId}:${bestAlternative.id}:${currentTrackedRoute.currentTravelTime}:${bestAlternative.currentTravelTime}`;
+      const severity = currentTrackedRoute.currentTravelTime >= 35 || alternativeSaving >= 8 ? "critical" : "attention";
+      if (!existingIds.has(id) && satisfiesMinSeverity(severity, minSev)) {
+        const worsened = previousTrackedRoute && currentTrackedRoute.currentTravelTime > previousTrackedRoute.currentTravelTime;
+        newNotifications.push({
+          id, category: "routes", severity, title: "Faster route available",
+          description: `${bestAlternative.name} is now ${alternativeSaving} min faster than your current route (${bestAlternative.currentTravelTime} vs ${currentTrackedRoute.currentTravelTime} min).${worsened ? ` Your route's ETA increased from ${previousTrackedRoute.currentTravelTime} to ${currentTrackedRoute.currentTravelTime} min.` : ""}`,
+          location: currentCity, routeId: bestAlternative.id, trackedRouteId, timestamp, createdAt: now.toISOString(), isRead: false,
+          action: { label: "View faster route", page: "route-intelligence", routeId: bestAlternative.id },
+        });
+        existingIds.add(id);
       }
     }
   }
@@ -219,6 +208,7 @@ export function detectSmartNotifications(prevState, nextState, settings, existin
               action: {
                 label: "View Map",
                 page: "live-map",
+                zoneId: zone.zoneId,
               },
             });
             existingIds.add(id);
@@ -248,6 +238,7 @@ export function detectSmartNotifications(prevState, nextState, settings, existin
               action: {
                 label: "View Map",
                 page: "live-map",
+                zoneId: zone.zoneId,
               },
             });
             existingIds.add(id);

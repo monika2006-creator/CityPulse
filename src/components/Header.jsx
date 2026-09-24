@@ -3,7 +3,7 @@ import SearchBar from "./SearchBar.jsx";
 import ThemeToggle from "./ThemeToggle.jsx";
 import { useCityPulseData } from "../context/CityPulseDataContext.jsx";
 
-export default function Header({ title, description, onMenuClick, onPlaceSelect, onOpenNotifications, onOpenSettings }) {
+export default function Header({ title, description, onMenuClick, onPlaceSelect, onOpenNotifications, onOpenSettings, notificationsOpen }) {
   const { state, dataMode, loading, selectedCity, unreadCount } = useCityPulseData();
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-bg/90 backdrop-blur supports-[backdrop-filter]:bg-bg/75">
@@ -46,6 +46,7 @@ export default function Header({ title, description, onMenuClick, onPlaceSelect,
             className="relative rounded-lg border border-border bg-surface p-2 text-muted transition-all duration-200 hover:border-cyan/40 hover:text-ink"
             aria-label="Notifications"
             aria-haspopup="dialog"
+            aria-expanded={notificationsOpen}
           >
             <Bell size={17} />
             {unreadCount > 0 && <span className="absolute -right-1 -top-1 min-w-4 rounded-full bg-critical px-1 text-center font-mono text-[9px] font-bold text-white">{unreadCount}</span>}

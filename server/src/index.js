@@ -6,8 +6,8 @@ import { generate, META } from './sim.js';
 import { CITIES as CITY_CONFIGS } from './zones.js';
 import { buildIndex, computeState } from './engine.js';
 import { buildSummary } from './summary.js';
-import { liveSnapshot } from './live.js';
-import { scenarioRoutes, tomtomRoutes, attachTrafficSignals, liveResult, geocode } from './routes.js';
+import { liveSnapshot, weatherAt } from './live.js';
+import { scenarioRoutes, tomtomRoutes, attachTrafficSignals, liveResult, geocode, routeAmenities } from './routes.js';
 
 const off = new Set(); // feeds switched off via the demo kill-switch
 const MIN = 60000;
@@ -171,6 +171,32 @@ app.get('/api/geocode', async (req, res) => {
   if (!key) return res.json({ results: [], warnings: ['no TomTom key'] });
   try { res.json({ results: await cached(`g:${city.id}:${q.toLowerCase()}`, 600_000, () => geocode(q, key, undefined, city.center)) }); }
   catch (e) { res.json({ results: [], warnings: [e.message] }); }
+});
+
+app.get('/api/weather', async (req, res) => {
+  const lat = Number(req.query.lat), lng = Number(req.query.lng), city = validCity(req.query.city);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) return res.status(400).json({ error: 'lat and lng must be valid coordinates' });
+  const toRadians = (n) => n * Math.PI / 180;
+  const dLat = toRadians(lat - city.center[0]), dLng = toRadians(lng - city.center[1]);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(toRadians(city.center[0])) * Math.cos(toRadians(lat)) * Math.sin(dLng / 2) ** 2;
+  if (6371 * 2 * Math.asin(Math.sqrt(h)) > 60) return res.status(400).json({ error: 'selected place is outside the active city' });
+  try {
+    const data = await weatherAt(lat, lng);
+    return res.json({ temperatureC: data.current.temperature_2m, rainfallMmh: data.current.rain ?? data.current.precipitation ?? 0, observedAt: data.current.time, source: 'Open-Meteo' });
+  } catch (e) {
+    return res.status(502).json({ error: `Weather unavailable (${e.message})` });
+  }
+});
+
+app.post('/api/amenities', async (req, res) => {
+  const path = req.body?.path;
+  if (!Array.isArray(path) || path.length < 2 || path.length > 500) return res.status(400).json({ error: 'path must contain between 2 and 500 route coordinates' });
+  try {
+    const places = await routeAmenities(path, { fuel: req.body?.fuel !== false, evChargers: req.body?.evChargers !== false });
+    return res.json({ places, source: 'OpenStreetMap', updatedAt: new Date().toISOString() });
+  } catch (e) {
+    return res.status(502).json({ places: [], error: `Route amenities unavailable (${e.message})` });
+  }
 });
 
 app.get('/api/feeds', (_req, res) => res.json([...['weather', 'traffic', 'incident']].map((id) => ({ id, enabled: !off.has(id) }))));

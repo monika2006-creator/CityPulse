@@ -9,15 +9,22 @@ const cachedFetch = async (key, ttl, load) => {
   return value;
 };
 
-async function currentWeather(zone) {
-  return cachedFetch(`weather:${zone.id}`, 5 * 60_000, async () => {
-    const qs = new URLSearchParams({ latitude: String(zone.lat), longitude: String(zone.lng), current: 'temperature_2m,precipitation,rain,weather_code', timezone: 'auto' });
+async function fetchWeatherAt(latitude, longitude) {
+    const qs = new URLSearchParams({ latitude: String(latitude), longitude: String(longitude), current: 'temperature_2m,precipitation,rain,weather_code', timezone: 'auto' });
     const response = await fetch(`https://api.open-meteo.com/v1/forecast?${qs}`, { signal: AbortSignal.timeout(7000) });
     if (!response.ok) throw new Error(`weather provider returned ${response.status}`);
     const data = await response.json();
     if (!data.current) throw new Error('weather provider returned no current conditions');
     return data;
-  });
+}
+
+export async function weatherAt(latitude, longitude) {
+  const key = `weather:${Number(latitude).toFixed(3)}:${Number(longitude).toFixed(3)}`;
+  return cachedFetch(key, 5 * 60_000, () => fetchWeatherAt(latitude, longitude));
+}
+
+async function currentWeather(zone) {
+  return weatherAt(zone.lat, zone.lng);
 }
 
 async function currentTraffic(zone, key, onTomTomRequest) {

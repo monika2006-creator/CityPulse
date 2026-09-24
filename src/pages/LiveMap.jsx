@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import MapView from "../components/MapView.jsx";
 import LiveSignalsPanel from "../components/LiveSignalsPanel.jsx";
 import MapLegend from "../components/MapLegend.jsx";
@@ -30,13 +30,38 @@ function FilterChip({ label, count, isActive, onClick }) {
   );
 }
 
-export default function LiveMap({ searchedPlace }) {
+export default function LiveMap({ searchedPlace, alertAction }) {
   const [activeFilter, setActiveFilter] = useState("all");
   const [selectedId, setSelectedId] = useState(null);
   const [focus, setFocus] = useState(null);
+  const [placeWeather, setPlaceWeather] = useState(null);
+  const [placeWeatherError, setPlaceWeatherError] = useState("");
   const isOverlayLayout = useMediaQuery("(min-width: 1280px)");
 
   const { activeSignals, dataMode, loading, state, error, selectedCity } = useCityPulseData();
+  useEffect(() => {
+    if (!searchedPlace || !Number.isFinite(Number(searchedPlace.lat)) || !Number.isFinite(Number(searchedPlace.lng))) {
+      setPlaceWeather(null);
+      setPlaceWeatherError("");
+      return undefined;
+    }
+    const controller = new AbortController();
+    setPlaceWeather(null);
+    setPlaceWeatherError("");
+    const query = new URLSearchParams({ lat: searchedPlace.lat, lng: searchedPlace.lng, city: selectedCity });
+    fetch(`/api/weather?${query}`, { signal: controller.signal })
+      .then(async (response) => { const body = await response.json(); if (!response.ok) throw new Error(body.error || "Weather unavailable"); return body; })
+      .then(setPlaceWeather)
+      .catch((error) => { if (error.name !== "AbortError") setPlaceWeatherError(error.message); });
+    return () => controller.abort();
+  }, [searchedPlace, selectedCity]);
+  useEffect(() => {
+    if (!alertAction?.zoneId) return;
+    const signal = activeSignals.find((item) => item.zoneId === alertAction.zoneId);
+    if (!signal) return;
+    setSelectedId(signal.id);
+    setFocus({ id: signal.id });
+  }, [alertAction?.zoneId, activeSignals.length]);
   if (loading && !state) return <p className="rounded-xl border border-border bg-surface p-6 text-sm text-muted" role="status">Loading map signals…</p>;
   if (!state) return <p className="rounded-xl border border-border bg-surface p-6 text-sm text-muted">Backend data unavailable: {error}</p>;
 
@@ -90,7 +115,7 @@ export default function LiveMap({ searchedPlace }) {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-xl font-bold uppercase tracking-tight text-ink">Live City Map</h2>
-          <p className="mt-1 text-sm text-muted">Monitor simulated civic signals across {selectedCity}.</p>
+          <p className="mt-1 text-sm text-muted">Monitor civic signals across {selectedCity}; live data is labeled by its provider.</p>
         </div>
         <div className="flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1.5 text-xs text-muted">
           <span className="h-1.5 w-1.5 rounded-full bg-muted" />
@@ -138,6 +163,8 @@ export default function LiveMap({ searchedPlace }) {
             selectedId={visibleSelectedId}
             focus={focus}
             city={selectedCity}
+            searchedPlaceWeather={placeWeather}
+            searchedPlaceWeatherError={placeWeatherError}
             onSelect={setSelectedId}
             onDeselect={handleDeselect}
             rightInset={isOverlayLayout ? PANEL_INSET : 0}

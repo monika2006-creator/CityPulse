@@ -20,12 +20,21 @@ const PAGES = {
 export default function App() {
   const [page, setPage] = useState("overview");
   const [searchedPlace, setSearchedPlace] = useState(null);
+  const [alertAction, setAlertAction] = useState(null);
   const CurrentPage = PAGES[page] ?? Overview;
+  const handleAlertNavigate = (targetPage, action) => {
+    setAlertAction(action ?? null);
+    setPage(targetPage);
+  };
+  const handlePlaceSelect = (place) => {
+    setSearchedPlace(place);
+    setPage("live-map");
+  };
 
   return (
     <CityPulseDataProvider>
-      <Layout currentPage={page} setCurrentPage={setPage} onNavigate={setPage} onPlaceSelect={setSearchedPlace}>
-        {page === "live-map" ? <LiveMap searchedPlace={searchedPlace} /> : <CurrentPage />}
+      <Layout currentPage={page} setCurrentPage={setPage} onNavigate={handleAlertNavigate} onPlaceSelect={handlePlaceSelect}>
+        {page === "live-map" ? <LiveMap searchedPlace={searchedPlace} alertAction={alertAction} /> : <CurrentPage alertAction={alertAction} />}
       </Layout>
     </CityPulseDataProvider>
   );

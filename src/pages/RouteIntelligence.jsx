@@ -24,14 +24,17 @@ function savedJourneyValue(key) {
   catch { return ""; }
 }
 
-export default function RouteIntelligence() {
-  const { loading, state, error, routeResponse, routes: scenarioRoutes, signals: stateSignals, situations, correlations, dataMode, selectedCity } = useCityPulseData();
+export default function RouteIntelligence({ alertAction }) {
+  const { loading, state, error, routeResponse, routes: scenarioRoutes, signals: stateSignals, situations, correlations, dataMode, selectedCity, settings, updateSettings } = useCityPulseData();
   const [fromInput, setFromInput] = useState(savedJourneyValue("from"));
   const [toInput, setToInput] = useState(savedJourneyValue("to"));
   const [routeResult, setRouteResult] = useState(null);
   const [notice, setNotice] = useState("");
   const [requesting, setRequesting] = useState(false);
   const [selectedRouteId, setSelectedRouteId] = useState(null);
+  const [routeAmenities, setRouteAmenities] = useState([]);
+  const [amenitiesLoading, setAmenitiesLoading] = useState(false);
+  const [amenitiesError, setAmenitiesError] = useState("");
   const detailRef = useRef(null);
   const routeInputsInitialized = useRef(false);
   const prevCityRef = useRef(selectedCity);
@@ -82,10 +85,44 @@ export default function RouteIntelligence() {
   }, [routes]);
   const lowestIds = useMemo(() => new Set(lowestEta.routes.map((route) => route.id)), [lowestEta]);
   const selectedRoute = routes.find((route) => route.id === selectedRouteId) ?? null;
+  const selectedRoutePathKey = JSON.stringify(selectedRoute?.path ?? []);
   const liveSignals = useMemo(() => mapRouteSignals(routeResult), [routeResult]);
   const routeSignals = [...stateSignals, ...liveSignals];
   const routeCorrelations = routeResult?.source === "tomtom" ? [] : correlations;
   const journeyLabel = `${routeData?.journey?.from?.name ?? fromInput} → ${routeData?.journey?.to?.name ?? toInput}`;
+
+  const handleSelectRoute = (routeId) => {
+    setSelectedRouteId(routeId);
+    updateSettings({ trackedRouteId: routeId });
+  };
+
+  useEffect(() => {
+    if (alertAction?.routeId && routes.some((route) => route.id === alertAction.routeId)) handleSelectRoute(alertAction.routeId);
+  }, [alertAction?.routeId, routes.length]);
+
+  useEffect(() => {
+    const fuel = Boolean(settings.showPetrolPumps), evChargers = Boolean(settings.showEvChargers);
+    if (!selectedRoute?.path?.length || (!fuel && !evChargers)) { setRouteAmenities([]); setAmenitiesError(""); setAmenitiesLoading(false); return undefined; }
+    const controller = new AbortController();
+    setAmenitiesLoading(true);
+    setAmenitiesError("");
+    fetch("/api/amenities", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ path: selectedRoute.path, fuel, evChargers }), signal: controller.signal })
+      .then(async (response) => { const data = await response.json(); if (!response.ok) throw new Error(data.error || "Unable to load route amenities"); return data; })
+      .then((data) => setRouteAmenities(data.places ?? []))
+      .catch((error) => { if (error.name !== "AbortError") { setRouteAmenities([]); setAmenitiesError(error.message); } })
+      .finally(() => { if (!controller.signal.aborted) setAmenitiesLoading(false); });
+    return () => controller.abort();
+  }, [selectedRoute?.id, selectedRoutePathKey, settings.showPetrolPumps, settings.showEvChargers]);
+
+  useEffect(() => {
+    if (selectedRouteId || !routes.length) return;
+    const saved = routes.find((route) => route.id === settings.trackedRouteId);
+    const initial = saved || routes.filter((route) => Number.isFinite(route.currentTravelTime)).sort((a, b) => a.currentTravelTime - b.currentTravelTime)[0];
+    if (initial) {
+      setSelectedRouteId(initial.id);
+      if (!settings.trackedRouteId) updateSettings({ trackedRouteId: initial.id });
+    }
+  }, [routes, selectedRouteId, settings.trackedRouteId, updateSettings]);
 
   useEffect(() => {
     if (!selectedRouteId || isTwoColumn) return;
@@ -147,7 +184,7 @@ export default function RouteIntelligence() {
       {routes.length > 0 && (
         <>
           <LowestEtaCard lowest={lowestEta} routes={routes} signals={routeSignals} situations={situations}
-            selectedId={selectedRouteId} onSelect={setSelectedRouteId} />
+            selectedId={selectedRouteId} onSelect={handleSelectRoute} />
           <div className="grid grid-cols-1 items-start gap-5 xl:grid-cols-5">
             <div className="space-y-5 xl:col-span-3">
               <section aria-label="Available routes">
@@ -158,14 +195,15 @@ export default function RouteIntelligence() {
                 <p className="mb-3 text-xs text-muted">ETA, delay, and fastest route are calculated from this route response.</p>
                 <div className="space-y-3">{routes.map((route) => (
                   <RouteCard key={route.id} route={route} signals={routeSignals} isLowestEta={lowestIds.has(route.id)}
-                    isTie={lowestEta.isTie} isSelected={route.id === selectedRouteId} onSelect={setSelectedRouteId} />
+                    isTie={lowestEta.isTie} isSelected={route.id === selectedRouteId} onSelect={handleSelectRoute} />
                 ))}</div>
               </section>
               <EtaComparison routes={routes} lowestIds={lowestIds} />
             </div>
             <div ref={detailRef} className="scroll-mt-44 xl:col-span-2">
               {selectedRoute ? <RouteDetail key={selectedRoute.id} route={selectedRoute} routes={routes} lowest={lowestEta}
-                signals={routeSignals} situations={situations} correlations={routeCorrelations} /> : (
+                signals={routeSignals} situations={situations} correlations={routeCorrelations} city={selectedCity}
+                amenities={routeAmenities} amenitiesLoading={amenitiesLoading} amenitiesError={amenitiesError} /> : (
                 <div className="flex min-h-[220px] flex-col items-center justify-center rounded-xl border border-dashed border-border bg-surface/40 px-6 py-10 text-center">
                   <RouteIcon size={19} className="mb-3 text-cyan-ink" aria-hidden="true" />
                   <p className="text-sm font-semibold text-ink">Route conditions</p>

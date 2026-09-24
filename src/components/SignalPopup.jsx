@@ -65,10 +65,15 @@ export default function SignalPopup({ signal }) {
         </div>
       </dl>
 
+      {signal.tempC != null && Number.isFinite(Number(signal.tempC)) && <div className="mt-3 flex items-center justify-between rounded-lg border border-border bg-inset px-3 py-2">
+        <span className="text-[10px] font-bold tracking-[0.1em] text-muted">AREA TEMPERATURE</span>
+        <span className="font-mono text-sm font-bold text-ink">{Number(signal.tempC).toFixed(1)}°C</span>
+      </div>}
+
       <p className="pt-3 text-[13px] leading-relaxed text-muted">{signal.description}</p>
 
       <p className="pt-3 font-mono text-[10px] tracking-wide text-muted">
-        {signal.id} · {signal.source === "tomtom" ? "TOMTOM ROUTE SIGNAL" : "SIMULATED SIGNAL"}
+        {signal.id} · {signal.dataMode === "live" ? "LIVE PROVIDER DATA" : "SIMULATED SIGNAL"}
       </p>
     </article>
   );

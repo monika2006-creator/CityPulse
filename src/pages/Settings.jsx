@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Settings as SettingsIcon,
   Bell,
@@ -74,6 +74,7 @@ export default function Settings() {
   const { theme, setTheme } = useTheme();
   const [clearedNotice, setClearedNotice] = useState(false);
   const [activeStep, setActiveStep] = useState(scenarioMin ?? 235);
+  useEffect(() => setActiveStep(scenarioMin), [scenarioMin]);
 
   const handleCityChange = (cityName) => {
     setSelectedCity(cityName);
@@ -128,6 +129,23 @@ export default function Settings() {
           <span className="rounded-full bg-cyan/20 px-2.5 py-0.5 font-mono text-[11px] font-bold text-cyan-ink">
             Minute: {activeStep}
           </span>
+        </div>
+
+        <div className="mt-4 grid gap-4 border-b border-border pb-4 sm:grid-cols-2">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-muted">Automatic data refresh</p>
+            <p className="mt-0.5 text-[11px] text-muted">Fetch current data and check for new alerts every:</p>
+            <div className="mt-2 flex gap-2">
+              {[5, 10].map((minutes) => <button key={minutes} type="button" onClick={() => updateSettings({ refreshIntervalMin: minutes })} aria-pressed={(settings.refreshIntervalMin ?? 5) === minutes} className={`rounded-lg border px-3 py-1.5 text-xs font-semibold ${((settings.refreshIntervalMin ?? 5) === minutes) ? "border-cyan bg-cyan/10 text-cyan-ink" : "border-border bg-surface text-muted"}`}>{minutes} minutes</button>)}
+            </div>
+          </div>
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-wider text-muted">Scenario time step</p>
+            <p className="mt-0.5 text-[11px] text-muted">In simulated mode, each refresh advances the demo by:</p>
+            <div className="mt-2 flex gap-2">
+              {[5, 10].map((minutes) => <button key={minutes} type="button" onClick={() => updateSettings({ scenarioStepMin: minutes })} aria-pressed={(settings.scenarioStepMin ?? 5) === minutes} className={`rounded-lg border px-3 py-1.5 text-xs font-semibold ${((settings.scenarioStepMin ?? 5) === minutes) ? "border-cyan bg-cyan/10 text-cyan-ink" : "border-border bg-surface text-muted"}`}>+{minutes} min</button>)}
+            </div>
+          </div>
         </div>
 
         <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4">

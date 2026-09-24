@@ -124,6 +124,40 @@ export async function attachTrafficSignals(routes, fetchImpl = fetch) {
   } catch { /* leave null */ }
 }
 
+const amenityCache = new Map();
+export async function routeAmenities(path, { fuel = true, evChargers = true } = {}, fetchImpl = fetch) {
+  const types = [fuel ? 'fuel' : null, evChargers ? 'charging_station' : null].filter(Boolean);
+  if (!types.length || !Array.isArray(path) || path.length < 2) return [];
+  const cacheKey = `${types.join(',')}:${JSON.stringify(path)}`;
+  const cached = amenityCache.get(cacheKey);
+  if (cached && Date.now() - cached.at < 10 * 60_000) return cached.value;
+  const lats = path.map((p) => Number(p[0])), lngs = path.map((p) => Number(p[1]));
+  if (lats.some((n) => !Number.isFinite(n)) || lngs.some((n) => !Number.isFinite(n))) throw new Error('route path contains invalid coordinates');
+  const padLat = 0.006, padLng = 0.008;
+  const bbox = [Math.min(...lats) - padLat, Math.min(...lngs) - padLng, Math.max(...lats) + padLat, Math.max(...lngs) + padLng].join(',');
+  const selector = types.join('|');
+  const query = `[out:json][timeout:15];(node["amenity"~"^(${selector})$"](${bbox});way["amenity"~"^(${selector})$"](${bbox}););out center tags;`;
+  let response;
+  let lastError;
+  for (const endpoint of ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter']) {
+    try {
+      response = await fetchImpl(endpoint, { method: 'POST', body: `data=${encodeURIComponent(query)}`, headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'User-Agent': 'CityPulse/1.0 (route amenities)' }, signal: AbortSignal.timeout(10000) });
+      if (response.ok) break;
+      lastError = new Error(`OpenStreetMap POI lookup returned ${response.status}`);
+    } catch (error) { lastError = error; }
+  }
+  if (!response?.ok) throw lastError || new Error('OpenStreetMap POI lookup failed');
+  const elements = (await response.json()).elements ?? [];
+  const result = elements.flatMap((element) => {
+    const lat = element.lat ?? element.center?.lat, lng = element.lon ?? element.center?.lon;
+    if (!Number.isFinite(lat) || !Number.isFinite(lng) || distToPath([lat, lng], path, path[0][0]) > 500) return [];
+    const amenity = element.tags?.amenity;
+    return [{ id: `${element.type}-${element.id}`, type: amenity === 'charging_station' ? 'ev_charger' : 'petrol', name: element.tags?.name ?? (amenity === 'charging_station' ? 'EV charging station' : 'Petrol station'), operator: element.tags?.operator ?? null, lat, lng }];
+  });
+  amenityCache.set(cacheKey, { at: Date.now(), value: result });
+  return result;
+}
+
 export function liveResult(routes, journey) {
   const shaped = routes.map(({ fullPath, ...r }) => ({ ...r, path: downsample(fullPath, 300) }));
   return finalize(shaped, { journey, source: 'tomtom', now: new Date().toISOString(), degraded: false, missingFeeds: [] });

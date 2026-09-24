@@ -11,12 +11,15 @@ export const DEFAULT_SETTINGS = {
   signalChangeAlerts: true,
   minSeverity: "all", // "all" | "medium_high" | "high_only"
   delayThresholdMin: 5,
+  refreshIntervalMin: 5,
+  scenarioStepMin: 5,
+  trackedRouteId: "route-1",
   defaultCity: "Jaipur",
   dataMode: "scenario", // "scenario" | "live"
   routePreference: "fastest", // "fastest" | "balanced" | "fewest_signals"
   showAmenities: false,
-  showPetrolPumps: false,
-  showEvChargers: false,
+  showPetrolPumps: true,
+  showEvChargers: true,
 };
 
 export const CITIES = [

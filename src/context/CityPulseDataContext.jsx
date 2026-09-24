@@ -28,7 +28,9 @@ function adaptState(raw) {
     const unit = item.unit || (type === "traffic" ? "%" : "");
     return {
       id: signalId(zone, item), type, category: type, title: item.label, severity: item.severity,
+      zoneId: zone.zoneId,
       location: zone.name, area: zone.name, latitude: item.lat ?? zone.lat, longitude: item.lng ?? zone.lng,
+      tempC: zone.weather?.tempC ?? null, dataMode: raw.mode === "live" ? "live" : "scenario",
       value, unit, change: value == null ? "Observed" : `${value} ${unit}`.trim(),
       detectedAt: clock(timestamp), timestamp, status: "active", description: item.label, source: raw.mode === "live" ? (item.source || "live") : "scenario",
     };
@@ -90,6 +92,7 @@ export function CityPulseDataProvider({ children }) {
   const isInitialLoadRef = useRef(true);
   const hasLoadedRef = useRef(false);
   const lastFetchedCityRef = useRef(null);
+  const fetchGenerationRef = useRef(0);
 
   const updateSettings = useCallback((newSettings) => {
     setSettings((prev) => {
@@ -126,10 +129,12 @@ export function CityPulseDataProvider({ children }) {
   }, []);
 
   const refresh = useCallback(async (customMin, advance = true) => {
+    const fetchGeneration = ++fetchGenerationRef.current;
     setSnapshot((old) => ({ ...old, loading: !old.state, error: "" }));
     try {
       const sameCity = lastFetchedCityRef.current === selectedCity;
-      const activeMin = customMin !== undefined ? customMin : hasLoadedRef.current && sameCity && advance ? (scenarioMinRef.current >= 475 ? 0 : scenarioMinRef.current + 5) : scenarioMinRef.current;
+      const stepMinutes = Number(settingsRef.current.scenarioStepMin) || 5;
+      const activeMin = customMin !== undefined ? customMin : hasLoadedRef.current && sameCity && advance ? (scenarioMinRef.current + stepMinutes > 480 ? 0 : scenarioMinRef.current + stepMinutes) : scenarioMinRef.current;
       scenarioMinRef.current = activeMin;
       setScenarioMinState(activeMin);
       const params = `?min=${activeMin}&city=${encodeURIComponent(selectedCity)}&mode=${activeDataMode}`;
@@ -138,6 +143,7 @@ export function CityPulseDataProvider({ children }) {
         jsonRequest(`/routes${params}`),
         jsonRequest("/health"),
       ]);
+      if (fetchGeneration !== fetchGenerationRef.current) return;
 
       const adaptedStateData = adaptState(stateRaw);
       const adaptedRoutesData = adaptRoutes(routeResponse ?? {});
@@ -182,6 +188,7 @@ export function CityPulseDataProvider({ children }) {
         health,
       });
     } catch (error) {
+      if (fetchGeneration !== fetchGenerationRef.current) return;
       setSnapshot((old) => ({
         ...old,
         loading: false,
@@ -199,11 +206,11 @@ export function CityPulseDataProvider({ children }) {
   useEffect(() => {
     const timer = setInterval(() => {
       if (document.visibilityState === "visible") {
-        void refresh(undefined, false);
+        void refresh(undefined, true);
       }
-    }, 30000);
+    }, Math.max(1, Number(settings.refreshIntervalMin) || 5) * 60_000);
     return () => clearInterval(timer);
-  }, [refresh]);
+  }, [refresh, settings.refreshIntervalMin]);
 
   const setScenarioMin = useCallback((min) => {
     scenarioMinRef.current = min;

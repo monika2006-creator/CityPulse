@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { AlertTriangle, ShieldCheck } from "lucide-react";
 import SituationDetailCard from "../components/SituationDetailCard.jsx";
 import SeverityCounts from "../components/SeverityCounts.jsx";
@@ -5,9 +6,13 @@ import { useCityPulseData } from "../context/CityPulseDataContext.jsx";
 
 // Detected situations, most serious first (the engine already sorts them).
 // Each card explains WHAT was detected, WHERE, HOW SERIOUS it is and WHY it was detected.
-export default function Situations() {
+export default function Situations({ alertAction }) {
   const { activeSituations: situations, severityCounts: counts, activeSignals, dataMode, loading, state, error } = useCityPulseData();
   const signalCount = activeSignals.length;
+  useEffect(() => {
+    if (!alertAction?.situationId) return;
+    window.setTimeout(() => document.getElementById(`${alertAction.situationId}-title`)?.scrollIntoView({ behavior: "smooth", block: "center" }), 100);
+  }, [alertAction?.situationId, situations.length]);
   if (loading && !state) return <p className="rounded-xl border border-border bg-surface p-6 text-sm text-muted" role="status">Loading detected situations…</p>;
   if (!state) return <p className="rounded-xl border border-border bg-surface p-6 text-sm text-muted">Backend data unavailable: {error}</p>;
 

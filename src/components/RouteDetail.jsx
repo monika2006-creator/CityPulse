@@ -111,7 +111,7 @@ function buildExplanation(route, lowest, routes, linked) {
   return parts.join(" ");
 }
 
-export default function RouteDetail({ route, routes, lowest, signals, situations, correlations }) {
+export default function RouteDetail({ route, routes, lowest, signals, situations, correlations, city = "Jaipur", amenities = [], amenitiesLoading = false, amenitiesError = "" }) {
   const [selectedSignalId, setSelectedSignalId] = useState(null);
   const delay = getDelayStyle(route);
   const linked = getRouteSignals(route, signals);
@@ -196,9 +196,10 @@ export default function RouteDetail({ route, routes, lowest, signals, situations
         </p>
       </div>
 
-      {linked.length > 0 && (
+      {linked.length > 0 || route.path?.length > 1 ? (
         <div className="mt-6 border-t border-border pt-5">
-          <SectionTitle icon={RouteIcon}>SIGNALS ON THIS ROUTE</SectionTitle>
+          <SectionTitle icon={RouteIcon}>SELECTED ROUTE MAP</SectionTitle>
+          <p className="mt-1 text-xs text-muted">Route corridor with observed signals and requested fuel / charging stops.</p>
           <div className="relative isolate mt-3 h-[420px] overflow-hidden rounded-xl border border-border bg-sidebar">
             {/* key: re-frame the map whenever the selected route changes */}
             <MapView
@@ -206,15 +207,19 @@ export default function RouteDetail({ route, routes, lowest, signals, situations
               signals={linked}
               selectedId={selectedSignalId}
               focus={null}
+              city={city}
+              routePath={route.path}
+              amenities={amenities}
               onSelect={setSelectedSignalId}
               onDeselect={(id) => setSelectedSignalId((current) => (current === id ? null : current))}
             />
           </div>
+          {(amenitiesLoading || amenitiesError || amenities.length > 0) && <p className="mt-2 text-xs text-muted" role="status">{amenitiesLoading ? "Looking for petrol stations and EV chargers along this route…" : amenitiesError || `${amenities.length} route stop${amenities.length === 1 ? "" : "s"} shown from OpenStreetMap.`}</p>}
           <p className="mt-2 font-mono text-[10.5px] tracking-wide text-muted">
             {route.source === "tomtom" ? "TOMTOM TRAFFIC SIGNALS · MAP © OPENSTREETMAP" : "SIMULATED ROUTE SIGNALS · MAP © OPENSTREETMAP"}
           </p>
         </div>
-      )}
+      ) : null}
     </section>
   );
 }

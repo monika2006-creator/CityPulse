@@ -84,7 +84,7 @@ function BriefPanel({ state, routeResponse, dataMode }) {
 }
 
 export default function Overview() {
-  const { loading, error, state, health, activeSignals, activeSituations, pulse, routes, routeResponse, dataMode, refresh, selectedCity } = useCityPulseData();
+  const { loading, error, state, health, activeSignals, activeSituations, pulse, routes, routeResponse, dataMode, refresh, selectedCity, settings } = useCityPulseData();
   const [selectedSignal, setSelectedSignal] = useState(null);
   const monitoredAreas = new Set((state?.zones ?? []).map((zone) => zone.zoneId)).size;
   const rankedSituations = useMemo(() => [...activeSituations].sort((a, b) => (b.timestamp || "").localeCompare(a.timestamp || "")), [activeSituations]);
@@ -102,7 +102,7 @@ export default function Overview() {
           <span>{dataMode === "LIVE" ? "Live observation:" : "Scenario time:"} <strong className="font-mono text-ink">{clock(state.updatedAt)} IST</strong></span>
           <span className="text-border">·</span>
           <span>Last Refreshed: <strong className="font-mono text-ink">{clock(state.refreshedAt)} IST</strong></span>
-          {dataMode !== "LIVE" && <span className="text-muted hidden sm:inline">(Advances +5m per refresh)</span>}
+          {dataMode !== "LIVE" && <span className="text-muted hidden sm:inline">(Advances +{settings.scenarioStepMin ?? 5}m every {settings.refreshIntervalMin ?? 5}m)</span>}
         </p>
         <div className="flex flex-wrap items-center gap-2">
           <span className={`rounded-full px-2.5 py-1 text-[9px] font-bold tracking-wider ${pulseTone[pulse] ?? "text-muted bg-elevated"}`}><span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-current" />{pulse}</span>

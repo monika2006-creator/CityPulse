@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import L from "leaflet";
-import { MapContainer, TileLayer, AttributionControl, CircleMarker, Tooltip, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, AttributionControl, CircleMarker, Tooltip, Popup, Polyline, Marker, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "./MapView.css";
 import SignalMarker from "./SignalMarker.jsx";
@@ -127,6 +127,20 @@ function CityCenterController({ city, signals, rightInset }) {
   return null;
 }
 
+function RouteFitController({ path }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!path?.length) return;
+    map.fitBounds(L.latLngBounds(path), { padding: [28, 28], maxZoom: 14 });
+  }, [map, path]);
+  return null;
+}
+
+function amenityIcon(type) {
+  const isCharger = type === "ev_charger";
+  return L.divIcon({ className: "cp-amenity-icon", html: `<span style="display:grid;place-items:center;width:28px;height:28px;border:2px solid white;border-radius:50%;background:${isCharger ? "#0e7490" : "#15803d"};color:white;font-size:15px;box-shadow:0 2px 8px #0008">${isCharger ? "⚡" : "⛽"}</span>`, iconSize: [28, 28], iconAnchor: [14, 14] });
+}
+
 /**
  * Interactive civic map. Renders whatever `signals` it is given — it owns no signal data.
  *
@@ -139,8 +153,12 @@ function CityCenterController({ city, signals, rightInset }) {
  *  - onDeselect(id): popup closed
  *  - rightInset:   px on the right covered by an overlay, so popups pan clear of it
  */
-export default function MapView({ signals, selectedId, focus, searchedPlace, city = "Jaipur", onSelect, onDeselect, rightInset = 0 }) {
+export default function MapView({ signals, selectedId, focus, searchedPlace, searchedPlaceWeather, searchedPlaceWeatherError, routePath, amenities = [], city = "Jaipur", onSelect, onDeselect, rightInset = 0 }) {
   const offsets = getMarkerOffsets(signals);
+  const searchedMarkerRef = useRef(null);
+  useEffect(() => {
+    if (searchedPlace) searchedMarkerRef.current?.openPopup();
+  }, [searchedPlace, searchedPlaceWeather]);
 
   // Opening view: frame every signal in the selected city, keeping clear of the
   // floating panel. MapContainer only reads this on first render.
@@ -183,13 +201,18 @@ export default function MapView({ signals, selectedId, focus, searchedPlace, cit
         ))}
 
         {searchedPlace && Number.isFinite(Number(searchedPlace.lat)) && Number.isFinite(Number(searchedPlace.lng)) && (
-          <CircleMarker center={[Number(searchedPlace.lat), Number(searchedPlace.lng)]} radius={9}
+          <CircleMarker ref={searchedMarkerRef} center={[Number(searchedPlace.lat), Number(searchedPlace.lng)]} radius={9}
             pathOptions={{ color: "#ffffff", weight: 3, fillColor: "#0891b2", fillOpacity: 1 }}>
             <Tooltip permanent direction="top" offset={[0, -8]}>{searchedPlace.name}</Tooltip>
+            <Popup><div className="min-w-40"><p className="font-semibold text-ink">{searchedPlace.name}</p>{searchedPlaceWeather ? <p className="mt-1 text-sm text-muted">Temperature <strong className="font-mono text-ink">{Number(searchedPlaceWeather.temperatureC).toFixed(1)}°C</strong></p> : <p className="mt-1 text-xs text-muted">{searchedPlaceWeatherError || "Loading local weather…"}</p>}{searchedPlaceWeather && <p className="text-[10px] text-muted">Current · Open-Meteo</p>}</div></Popup>
           </CircleMarker>
         )}
 
+        {routePath?.length > 1 && <Polyline positions={routePath} pathOptions={{ color: "#0891b2", weight: 5, opacity: 0.9 }} />}
+        {amenities.map((place) => <Marker key={place.id} position={[place.lat, place.lng]} icon={amenityIcon(place.type)}><Popup><strong>{place.name || (place.type === "ev_charger" ? "EV charger" : "Petrol station")}</strong><p className="text-xs text-muted">{place.type === "ev_charger" ? "EV charging" : "Fuel / petrol"}{place.operator ? ` · ${place.operator}` : ""}</p></Popup></Marker>)}
+
         <CityCenterController city={city} signals={signals} rightInset={rightInset} />
+        <RouteFitController path={routePath} />
         <FocusController focus={focus} signals={signals} rightInset={rightInset} />
         <PlaceFocusController place={searchedPlace} />
         <CloseOnEscape />
