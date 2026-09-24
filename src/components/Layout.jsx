@@ -25,7 +25,7 @@ const PAGE_META = {
   },
 };
 
-export default function Layout({ currentPage, setCurrentPage, children }) {
+export default function Layout({ currentPage, setCurrentPage, onPlaceSelect, children }) {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const meta = PAGE_META[currentPage] ?? PAGE_META.overview;
 
@@ -43,6 +43,7 @@ export default function Layout({ currentPage, setCurrentPage, children }) {
           title={meta.title}
           description={meta.description}
           onMenuClick={() => setSidebarOpen(true)}
+          onPlaceSelect={onPlaceSelect}
         />
         <div className="flex-1 overflow-y-auto px-5 py-6 sm:px-8 sm:py-8">
           {children}

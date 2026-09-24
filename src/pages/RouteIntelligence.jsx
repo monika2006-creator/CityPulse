@@ -19,21 +19,44 @@ function mapRouteSignals(routeResult) {
   }))).filter((signal) => Number.isFinite(signal.latitude) && Number.isFinite(signal.longitude));
 }
 
+function savedJourneyValue(key) {
+  try { return localStorage.getItem(`citypulse.route.${key}`) ?? ""; }
+  catch { return ""; }
+}
+
 export default function RouteIntelligence() {
   const { loading, state, error, routeResponse, routes: scenarioRoutes, signals: stateSignals, situations, correlations, dataMode } = useCityPulseData();
-  const [fromInput, setFromInput] = useState("");
-  const [toInput, setToInput] = useState("");
+  const [fromInput, setFromInput] = useState(savedJourneyValue("from"));
+  const [toInput, setToInput] = useState(savedJourneyValue("to"));
   const [routeResult, setRouteResult] = useState(null);
   const [notice, setNotice] = useState("");
   const [requesting, setRequesting] = useState(false);
   const [selectedRouteId, setSelectedRouteId] = useState(null);
   const detailRef = useRef(null);
+  const routeInputsInitialized = useRef(false);
   const isTwoColumn = useMediaQuery("(min-width: 1280px)");
 
   useEffect(() => {
-    if (!fromInput && routeResponse?.journey?.from?.name) setFromInput(routeResponse.journey.from.name);
-    if (!toInput && routeResponse?.journey?.to?.name) setToInput(routeResponse.journey.to.name);
-  }, [routeResponse, fromInput, toInput]);
+    if (routeInputsInitialized.current || !routeResponse?.journey) return;
+    const from = fromInput || routeResponse.journey.from?.name || "";
+    const to = toInput || routeResponse.journey.to?.name || "";
+    setFromInput(from);
+    setToInput(to);
+    try {
+      localStorage.setItem("citypulse.route.from", from);
+      localStorage.setItem("citypulse.route.to", to);
+    } catch { /* The form still works when browser storage is unavailable. */ }
+    routeInputsInitialized.current = true;
+  }, [routeResponse]);
+
+  const updateFrom = (value) => {
+    setFromInput(value);
+    try { localStorage.setItem("citypulse.route.from", value); } catch { /* Optional persistence. */ }
+  };
+  const updateTo = (value) => {
+    setToInput(value);
+    try { localStorage.setItem("citypulse.route.to", value); } catch { /* Optional persistence. */ }
+  };
 
   const routeData = routeResult ?? routeResponse;
   const routes = routeResult ? adaptRoutes(routeResult) : scenarioRoutes;
@@ -103,7 +126,7 @@ export default function RouteIntelligence() {
         </div>
       </div>
 
-      <JourneyForm from={fromInput} to={toInput} onFromChange={setFromInput} onToChange={setToInput}
+      <JourneyForm from={fromInput} to={toInput} onFromChange={updateFrom} onToChange={updateTo}
         onSubmit={handleAnalyze} feedback={requesting ? "Searching places and calculating routes…" : notice}
         loading={requesting} sourceHint="TomTom geocodes both places. Live routing requires a configured TomTom key; fallback is labeled." />
 

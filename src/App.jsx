@@ -17,12 +17,17 @@ const PAGES = {
 
 export default function App() {
   const [page, setPage] = useState("overview");
+  const [searchedPlace, setSearchedPlace] = useState(null);
   const CurrentPage = PAGES[page] ?? Overview;
+  const handlePlaceSelect = (place) => {
+    setSearchedPlace({ ...place, requestId: Date.now() });
+    setPage("live-map");
+  };
 
   return (
     <CityPulseDataProvider>
-      <Layout currentPage={page} setCurrentPage={setPage}>
-        <CurrentPage />
+      <Layout currentPage={page} setCurrentPage={setPage} onPlaceSelect={handlePlaceSelect}>
+        <CurrentPage searchedPlace={searchedPlace} />
       </Layout>
     </CityPulseDataProvider>
   );

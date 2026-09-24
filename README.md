@@ -24,16 +24,16 @@ GEMINI_MODEL=gemini-2.5-flash
 
 ## Run locally
 
-From the project root, start both the API and frontend together:
+After downloading and extracting the ZIP, open a terminal in the project root and run:
 
 ```bash
-cd "/Users/mysticnight/Desktop/citypulse"
-npm ci
-npm --prefix server ci
-npm run dev:all
+npm run setup
+npm run dev
 ```
 
-The dashboard opens at `http://localhost:5173`. Keep that terminal running; press Ctrl+C to stop both services.
+`npm run setup` installs dependencies for both the frontend and the API. `npm run dev` starts both services together. Open the local URL Vite prints in the terminal (usually `http://localhost:5173`). Keep that terminal running; press Ctrl+C to stop both services.
+
+Do not open `index.html` directly or use VS Code's Live Server: the browser needs the running API and the Vite `/api` proxy.
 
 To start either service separately, use two terminals:
 
@@ -43,8 +43,8 @@ npm start
 ```
 
 ```bash
-cd "/Users/mysticnight/Desktop/citypulse"
-npm run dev
+cd /path/to/citypulse
+npm run dev:web
 ```
 
 Vite proxies `/api` requests to `http://127.0.0.1:8787`.

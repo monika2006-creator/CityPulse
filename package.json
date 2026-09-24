@@ -4,8 +4,10 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "setup": "node scripts/setup.js",
+    "dev": "node scripts/dev-all.js",
     "dev:all": "node scripts/dev-all.js",
+    "dev:web": "vite",
     "build": "vite build",
     "preview": "vite preview"
   },

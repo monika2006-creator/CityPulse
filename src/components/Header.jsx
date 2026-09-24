@@ -3,7 +3,7 @@ import SearchBar from "./SearchBar.jsx";
 import ThemeToggle from "./ThemeToggle.jsx";
 import { useCityPulseData } from "../context/CityPulseDataContext.jsx";
 
-export default function Header({ title, description, onMenuClick }) {
+export default function Header({ title, description, onMenuClick, onPlaceSelect }) {
   const { state, dataMode, loading } = useCityPulseData();
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-bg/90 backdrop-blur supports-[backdrop-filter]:bg-bg/75">
@@ -23,6 +23,10 @@ export default function Header({ title, description, onMenuClick }) {
             </h1>
             <p className="mt-0.5 truncate text-sm text-muted">{description}</p>
           </div>
+        </div>
+
+        <div className="hidden min-w-0 flex-1 px-4 md:block">
+          <SearchBar className="mx-auto max-w-xl" onPlaceSelect={onPlaceSelect} />
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
@@ -53,8 +57,8 @@ export default function Header({ title, description, onMenuClick }) {
         </div>
       </div>
 
-      <div className="px-5 py-4 sm:px-8">
-        <SearchBar className="max-w-xl" />
+      <div className="px-5 py-3 md:hidden sm:px-8">
+        <SearchBar onPlaceSelect={onPlaceSelect} />
       </div>
     </header>
   );

@@ -30,7 +30,7 @@ function FilterChip({ label, count, isActive, onClick }) {
   );
 }
 
-export default function LiveMap() {
+export default function LiveMap({ searchedPlace }) {
   const [activeFilter, setActiveFilter] = useState("all");
   const [selectedId, setSelectedId] = useState(null);
   const [focus, setFocus] = useState(null);
@@ -134,6 +134,7 @@ export default function LiveMap() {
         <div className="relative isolate h-[60vh] min-h-[420px] overflow-hidden rounded-xl border border-border bg-sidebar lg:h-[calc(100vh-25rem)] lg:min-h-[480px]">
           <MapView
             signals={visibleSignals}
+            searchedPlace={searchedPlace}
             selectedId={visibleSelectedId}
             focus={focus}
             onSelect={setSelectedId}

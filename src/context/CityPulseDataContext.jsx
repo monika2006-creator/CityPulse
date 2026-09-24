@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { calculateRoutes } from "../utils/routeCalculations.js";
 import { correlateSignals } from "../utils/signalCorrelation.js";
 
@@ -37,7 +37,7 @@ function adaptState(raw) {
       correlation: item.correlation,
     };
   });
-  return { ...raw, signals, situations, updatedAt: raw.now, mode: raw.mode || "scenario" };
+  return { ...raw, sourceState: raw, signals, situations, updatedAt: raw.now, mode: raw.mode || "scenario" };
 }
 
 function adaptRoutes(raw) {
@@ -66,11 +66,14 @@ async function jsonRequest(path, init) {
 
 export function CityPulseDataProvider({ children }) {
   const [snapshot, setSnapshot] = useState({ loading: true, error: "", state: null, routeResponse: null, health: null });
+  const replayMinute = useRef(235);
   const refresh = useCallback(async () => {
-    setSnapshot((old) => ({ ...old, loading: !old.state, error: "" }));
+    const min = replayMinute.current;
+    replayMinute.current = min >= 475 ? 0 : min + 5;
+    setSnapshot((old) => ({ ...old, loading: true, error: "" }));
     try {
       const [stateRaw, routeResponse, health] = await Promise.all([
-        jsonRequest("/state"), jsonRequest("/routes"), jsonRequest("/health"),
+        jsonRequest(`/state?min=${min}`), jsonRequest(`/routes?min=${min}`), jsonRequest("/health"),
       ]);
       setSnapshot({ loading: false, error: "", state: adaptState(stateRaw), routeResponse, health });
     } catch (error) {
@@ -89,7 +92,7 @@ export function CityPulseDataProvider({ children }) {
       if (key in counts) counts[key] += 1;
       return counts;
     }, { low: 0, medium: 0, high: 0, critical: 0 });
-    const pulse = state?.pulse?.level === "Heavy" ? "CRITICAL" : state?.pulse?.level === "Elevated" ? "ATTENTION" : state ? "NORMAL" : "—";
+    const pulse = state?.pulse?.level === "critical" ? "CRITICAL" : state?.pulse?.level === "attention" ? "ATTENTION" : state ? "NORMAL" : "—";
     return {
       ...snapshot, state, routes, signals: state?.signals ?? [], situations, correlations,
       activeSignals: (state?.signals ?? []).filter((s) => s.status === "active"),

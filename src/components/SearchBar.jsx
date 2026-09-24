@@ -4,16 +4,47 @@ import { Search, X, ArrowRight } from "lucide-react";
 export default function SearchBar({
   placeholder = "Search an area, landmark, or situation…",
   className = "",
+  onPlaceSelect,
 }) {
   const [value, setValue] = useState("");
   const [focused, setFocused] = useState(false);
   const [results, setResults] = useState([]);
+  const [resultsFor, setResultsFor] = useState("");
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
   const inputRef = useRef(null);
 
+  const choosePlace = (place) => {
+    setValue(place.name);
+    setResults([]);
+    setResultsFor("");
+    setFocused(false);
+    onPlaceSelect?.(place);
+  };
+
+  const submitSearch = async (event) => {
+    event.preventDefault();
+    const query = value.trim();
+    if (results.length && resultsFor === query) { choosePlace(results[0]); return; }
+    if (query.length < 3) { setSearchError("Enter at least 3 characters to search for a place."); setFocused(true); return; }
+    setSearching(true);
+    setSearchError("");
+    try {
+      const response = await fetch(`/api/geocode?q=${encodeURIComponent(query)}`, { signal: AbortSignal.timeout(8000) });
+      if (!response.ok) throw new Error("Place search unavailable");
+      const data = await response.json();
+      const place = data.results?.[0];
+      setResultsFor(query);
+      if (place) { setResults(data.results); choosePlace(place); }
+      else { setResults([]); setSearchError(data.warnings?.[0] || "No matching place found. Try a more specific name."); setFocused(true); }
+    } catch {
+      setSearchError("Place search failed. Check that the backend is running and TomTom is configured.");
+      setFocused(true);
+    } finally { setSearching(false); }
+  };
+
   useEffect(() => {
-    if (value.trim().length < 3) { setResults([]); setSearchError(""); return undefined; }
+    if (value.trim().length < 3) { setResults([]); setResultsFor(""); setSearchError(""); return undefined; }
     let cancelled = false;
     const timer = setTimeout(async () => {
       setSearching(true);
@@ -21,9 +52,9 @@ export default function SearchBar({
         const response = await fetch(`/api/geocode?q=${encodeURIComponent(value.trim())}`, { signal: AbortSignal.timeout(8000) });
         if (!response.ok) throw new Error("Place search unavailable");
         const data = await response.json();
-        if (!cancelled) { setResults(data.results ?? []); setSearchError(data.warnings?.[0] ?? ""); }
+        if (!cancelled) { setResults(data.results ?? []); setResultsFor(value.trim()); setSearchError(data.warnings?.[0] ?? ""); }
       } catch {
-        if (!cancelled) { setResults([]); setSearchError("Place search is unavailable. Check backend and TomTom setup."); }
+        if (!cancelled) { setResults([]); setResultsFor(value.trim()); setSearchError("Place search is unavailable. Check backend and TomTom setup."); }
       } finally { if (!cancelled) setSearching(false); }
     }, 350);
     return () => { cancelled = true; clearTimeout(timer); };
@@ -37,7 +68,7 @@ export default function SearchBar({
 
   return (
     <form
-      onSubmit={(e) => e.preventDefault()}
+      onSubmit={submitSearch}
       className={`group relative flex w-full items-center ${className}`}
     >
       <Search
@@ -51,10 +82,10 @@ export default function SearchBar({
         <div role="listbox" aria-label="Place search results" className="absolute left-0 right-0 top-full z-30 mt-1 overflow-hidden rounded-lg border border-border bg-surface shadow-float">
           {searching && <p className="px-3 py-2 text-xs text-muted" role="status">Searching places…</p>}
           {searchError && <p className="px-3 py-2 text-xs text-muted">{searchError}</p>}
-          {results.map((place) => (
+          {resultsFor === value.trim() && results.map((place) => (
             <button key={place.id} type="button" role="option" aria-selected="false"
               onMouseDown={(event) => event.preventDefault()}
-              onClick={() => { setValue(place.name); setResults([]); setFocused(false); }}
+              onClick={() => choosePlace(place)}
               className="block w-full px-3 py-2 text-left hover:bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan">
               <span className="block text-sm font-medium text-ink">{place.name}</span>
               {place.address && <span className="block text-xs text-muted">{place.address}</span>}

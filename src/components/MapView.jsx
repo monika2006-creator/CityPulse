@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import L from "leaflet";
-import { MapContainer, TileLayer, AttributionControl, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, AttributionControl, CircleMarker, Tooltip, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "./MapView.css";
 import SignalMarker from "./SignalMarker.jsx";
@@ -86,6 +86,16 @@ function FocusController({ focus, signals, rightInset }) {
   return null;
 }
 
+function PlaceFocusController({ place }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!place || !Number.isFinite(Number(place.lat)) || !Number.isFinite(Number(place.lng))) return;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    map.flyTo([Number(place.lat), Number(place.lng)], Math.max(map.getZoom(), 14), { animate: !reduceMotion, duration: 0.7 });
+  }, [place, map]);
+  return null;
+}
+
 // Escape closes the open popup even when keyboard focus is outside the map
 // (for example on a LIVE SIGNALS row). Leaflet only handles Escape while the map has focus.
 function CloseOnEscape() {
@@ -113,7 +123,7 @@ function CloseOnEscape() {
  *  - onDeselect(id): popup closed
  *  - rightInset:   px on the right covered by an overlay, so popups pan clear of it
  */
-export default function MapView({ signals, selectedId, focus, onSelect, onDeselect, rightInset = 0 }) {
+export default function MapView({ signals, selectedId, focus, searchedPlace, onSelect, onDeselect, rightInset = 0 }) {
   const offsets = getMarkerOffsets(signals);
 
   // Opening view: frame every signal (they are all in Jaipur), keeping clear of the
@@ -165,7 +175,15 @@ export default function MapView({ signals, selectedId, focus, onSelect, onDesele
           />
         ))}
 
+        {searchedPlace && Number.isFinite(Number(searchedPlace.lat)) && Number.isFinite(Number(searchedPlace.lng)) && (
+          <CircleMarker center={[Number(searchedPlace.lat), Number(searchedPlace.lng)]} radius={9}
+            pathOptions={{ color: "#ffffff", weight: 3, fillColor: "#0891b2", fillOpacity: 1 }}>
+            <Tooltip permanent direction="top" offset={[0, -8]}>{searchedPlace.name}</Tooltip>
+          </CircleMarker>
+        )}
+
         <FocusController focus={focus} signals={signals} rightInset={rightInset} />
+        <PlaceFocusController place={searchedPlace} />
         <CloseOnEscape />
       </MapContainer>
 
