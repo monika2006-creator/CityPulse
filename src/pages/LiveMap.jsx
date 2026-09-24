@@ -50,7 +50,15 @@ export default function LiveMap({ searchedPlace, alertAction }) {
     setPlaceWeatherError("");
     const query = new URLSearchParams({ lat: searchedPlace.lat, lng: searchedPlace.lng, city: selectedCity });
     fetch(`/api/weather?${query}`, { signal: controller.signal })
-      .then(async (response) => { const body = await response.json(); if (!response.ok) throw new Error(body.error || "Weather unavailable"); return body; })
+      .then(async (response) => {
+        const contentType = response.headers.get("content-type") || "";
+        if (!contentType.includes("application/json")) {
+          throw new Error("Weather API route is missing. Stop old CityPulse servers, then restart with `npm run dev`.");
+        }
+        const body = await response.json();
+        if (!response.ok) throw new Error(body.error || "Weather unavailable");
+        return body;
+      })
       .then(setPlaceWeather)
       .catch((error) => { if (error.name !== "AbortError") setPlaceWeatherError(error.message); });
     return () => controller.abort();
