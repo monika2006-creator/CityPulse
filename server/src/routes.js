@@ -132,10 +132,20 @@ const downsample = (a, n) => (a.length <= n ? a : a.filter((_, i) => i % Math.ce
 
 // ---- geocoding (TomTom Search), biased to selected city center ----
 export async function geocode(q, key, fetchImpl = fetch, center = [26.9124, 75.7873]) {
+  const city = Object.entries({ Jaipur: [26.9124, 75.7873], Jodhpur: [26.2389, 73.0243], Udaipur: [24.5854, 73.7125] })
+    .find(([, point]) => point[0] === center[0] && point[1] === center[1])?.[0] ?? 'Jaipur';
+  const query = new RegExp(`\\b${city}\\b`, 'i').test(q) ? q : `${q}, ${city}, Rajasthan, India`;
   const qs = new URLSearchParams({ key, limit: '10', countrySet: 'IN', lat: String(center[0]), lon: String(center[1]), radius: '60000', typeahead: 'true', language: 'en-GB' });
-  const res = await fetchImpl(`https://api.tomtom.com/search/2/search/${encodeURIComponent(q)}.json?${qs}`, { signal: AbortSignal.timeout(5000) });
+  const res = await fetchImpl(`https://api.tomtom.com/search/2/search/${encodeURIComponent(query)}.json?${qs}`, { signal: AbortSignal.timeout(5000) });
   if (!res.ok) throw new Error(`TomTom search ${res.status}`);
-  const rawResults = ((await res.json()).results ?? []).map((x) => ({
+  const distanceKm = (a, b) => {
+    const rad = (d) => d * Math.PI / 180;
+    const dLat = rad(a[0] - b[0]), dLon = rad(a[1] - b[1]);
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a[0])) * Math.cos(rad(b[0])) * Math.sin(dLon / 2) ** 2;
+    return 6371 * 2 * Math.asin(Math.sqrt(h));
+  };
+  const rawResults = ((await res.json()).results ?? []).filter((x) => Number.isFinite(x.position?.lat) && Number.isFinite(x.position?.lon))
+    .filter((x) => distanceKm(center, [x.position.lat, x.position.lon]) <= 60).map((x) => ({
     id: x.id,
     name: x.poi?.name ?? x.address?.freeformAddress ?? q,
     address: x.address?.freeformAddress ?? '',
@@ -147,7 +157,7 @@ export async function geocode(q, key, fetchImpl = fetch, center = [26.9124, 75.7
   const list = [];
 
   // Special handling for Amity locations to verify coordinates and avoid duplicates
-  if (qLower.includes('amity')) {
+  if (city === 'Jaipur' && qLower.includes('amity')) {
     // Add verified Amity University Rajasthan
     list.push({
       id: 'amity-university-rajasthan',

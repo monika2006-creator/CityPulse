@@ -4,12 +4,14 @@ React + Vite civic intelligence dashboard backed by the local Express API.
 
 ## Data sources and limits
 
-- `/api/state` provides deterministic **simulated scenario** signals, situations, pulse, and summary. It is not a live government/weather/incident feed.
-- `/api/routes` provides scenario routes by default. With TomTom configured, `/api/routes?mode=live&from=lat,lng&to=lat,lng` returns TomTom traffic-aware route ETAs and traffic sections.
-- `/api/geocode` uses TomTom place search. If TomTom is unavailable, routing falls back to the labeled scenario response.
+- `/api/state` provides deterministic **simulated scenario** signals by default. With `mode=live`, it requests current weather from Open-Meteo and traffic flow from TomTom for the selected city's monitored zones.
+- Live weather needs no API key. TomTom traffic, live routing, and place search require `TOMTOM_KEY`; the backend labels unavailable feeds and falls back to the simulated scenario when live providers are unavailable.
+- `/api/routes` provides city-specific scenario routes by default. With TomTom configured, `mode=live` requests traffic-aware ETAs. The route page can also route between searched places.
+- `/api/geocode` biases and constrains results to the selected city, and includes the city in the search query to avoid returning Jaipur results for Jodhpur or Udaipur.
+- Live mode currently has no real-time incident provider. Incident counts are therefore unavailable in live mode and are not copied from simulated data.
 - `/api/health` reports backend status and the TomTom request counter.
 
-The UI derives frontend signal/situation shapes, correlations, delay and lowest-ETA display from backend responses and existing deterministic utilities. It does not label scenario civic signals as live.
+The UI derives frontend signal/situation shapes, correlations, delay and lowest-ETA display from backend responses and existing deterministic utilities. Scenario data remains explicitly labeled as simulated.
 
 ## Configure
 

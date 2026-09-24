@@ -30,7 +30,7 @@ function adaptState(raw) {
       id: signalId(zone, item), type, category: type, title: item.label, severity: item.severity,
       location: zone.name, area: zone.name, latitude: item.lat ?? zone.lat, longitude: item.lng ?? zone.lng,
       value, unit, change: value == null ? "Observed" : `${value} ${unit}`.trim(),
-      detectedAt: clock(timestamp), timestamp, status: "active", description: item.label, source: "scenario",
+      detectedAt: clock(timestamp), timestamp, status: "active", description: item.label, source: raw.mode === "live" ? (item.source || "live") : "scenario",
     };
   }));
   const situations = (raw.situations ?? []).map((item) => {
@@ -79,6 +79,7 @@ export function CityPulseDataProvider({ children }) {
   const [selectedCity, setSelectedCityState] = useState(getStoredCity);
   const [notifications, setNotifications] = useState(getStoredNotifications);
   const [scenarioMin, setScenarioMinState] = useState(235);
+  const activeDataMode = settings.dataMode === "live" ? "live" : "scenario";
   const scenarioMinRef = useRef(235);
   const settingsRef = useRef(settings);
   const notificationsRef = useRef(notifications);
@@ -131,7 +132,7 @@ export function CityPulseDataProvider({ children }) {
       const activeMin = customMin !== undefined ? customMin : hasLoadedRef.current && sameCity && advance ? (scenarioMinRef.current >= 475 ? 0 : scenarioMinRef.current + 5) : scenarioMinRef.current;
       scenarioMinRef.current = activeMin;
       setScenarioMinState(activeMin);
-      const params = `?min=${activeMin}&city=${encodeURIComponent(selectedCity)}`;
+      const params = `?min=${activeMin}&city=${encodeURIComponent(selectedCity)}&mode=${activeDataMode}`;
       const [stateRaw, routeResponse, health] = await Promise.all([
         jsonRequest(`/state${params}`),
         jsonRequest(`/routes${params}`),
@@ -187,7 +188,7 @@ export function CityPulseDataProvider({ children }) {
         error: error.message || "Unable to update civic data.",
       }));
     }
-  }, [selectedCity]);
+  }, [selectedCity, activeDataMode]);
 
   // Initial fetch
   useEffect(() => {

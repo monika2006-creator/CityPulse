@@ -109,7 +109,7 @@ export default function Settings() {
         </p>
       </div>
 
-      {/* DEMO SCENARIO STEPPER (CRITICAL FOR JUDGING DEMO) */}
+      {/* Scenario timeline controls for the deterministic demo data. */}
       <section className="rounded-xl border border-cyan/30 bg-cyan/[0.04] p-5 sm:p-6 shadow-card">
         <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-cyan/20">
           <div className="flex items-center gap-2">
@@ -118,10 +118,10 @@ export default function Settings() {
             </span>
             <div>
               <h3 className="text-sm font-bold uppercase tracking-wider text-ink">
-                Scenario Timeline Stepper (Hackathon Judging Demo)
+                Scenario Timeline (Demo Controls)
               </h3>
               <p className="text-xs text-muted">
-                Step through deterministic backend scenario minutes to trigger real dynamic Smart Notifications.
+                Advances the simulated Monsoon Tuesday timeline so you can preview changing alerts. This is generated demo data, not current city conditions.
               </p>
             </div>
           </div>
@@ -328,10 +328,18 @@ export default function Settings() {
             >
               <span>Live Mode</span>
               <span className="rounded bg-normal/20 px-1.5 py-0.2 font-mono text-[9px] text-normal">
-                {isTomTomConfigured ? "TomTom Active" : "Requires TomTom Key"}
+                {isTomTomConfigured ? "Weather + TomTom Traffic" : "Weather Live; TomTom key needed for traffic and routes"}
               </span>
             </button>
           </div>
+          {settings.dataMode === "live" && (state?.mode !== "live" || state?.warnings?.length > 0) && (
+            <p role="status" className="mt-2 rounded-lg border border-attention/30 bg-attention/10 px-3 py-2 text-xs text-attention-ink">
+              {state?.warnings?.join(" ") || "Live provider data has not arrived yet. Check the backend connection and provider status below."}
+            </p>
+          )}
+          <p className="mt-2 text-[11px] text-muted">
+            Live mode requests current weather from Open-Meteo and traffic speeds from TomTom. The incidents feed remains unavailable unless a live incident provider is connected; unavailable feeds are identified in System Status.
+          </p>
           {settings.dataMode === "scenario" && (
             <p className="mt-2 text-[11px] text-muted italic">
               Note: Scenario data is deterministic simulation for reliable testing. It is never labeled as live government data.

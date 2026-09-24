@@ -16,6 +16,12 @@ export default function SearchBar({
   const [searchError, setSearchError] = useState("");
   const inputRef = useRef(null);
 
+  useEffect(() => {
+    setResults([]);
+    setResultsFor("");
+    setSearchError("");
+  }, [selectedCity]);
+
   const choosePlace = (place) => {
     setValue(place.name);
     setResults([]);

@@ -34,7 +34,7 @@ function PanelTitle({ children, action }) {
   return <div className="mb-3 flex items-center justify-between gap-2"><h2 className="text-sm font-bold text-ink">{children}</h2>{action}</div>;
 }
 
-function BriefPanel({ state, routeResponse }) {
+function BriefPanel({ state, routeResponse, dataMode }) {
   const [brief, setBrief] = useState(null);
   const [briefError, setBriefError] = useState("");
   const [loadingBrief, setLoadingBrief] = useState(false);
@@ -76,7 +76,7 @@ function BriefPanel({ state, routeResponse }) {
         </div>
       </div>
       <p className="mt-3 border-t border-border pt-2 text-[9px] text-muted flex items-center justify-between">
-        <span>SIMULATED SCENARIO · Scenario Time: <strong className="font-mono text-ink">{clock(state.updatedAt)} IST</strong></span>
+        <span>{dataMode === "LIVE" ? "LIVE OBSERVATION" : "SIMULATED SCENARIO"} · {dataMode === "LIVE" ? "Observed:" : "Scenario Time:"} <strong className="font-mono text-ink">{clock(state.updatedAt)} IST</strong></span>
         <span>Refreshed: <strong className="font-mono text-ink">{clock(state.refreshedAt)} IST</strong></span>
       </p>
     </aside>
@@ -99,10 +99,10 @@ export default function Overview() {
     <div className="space-y-3.5">
       <div className="flex flex-wrap items-center justify-end gap-3">
         <p className="mr-auto text-[10px] text-muted flex flex-wrap items-center gap-1.5">
-          <span>Scenario Time: <strong className="font-mono text-ink">{clock(state.updatedAt)} IST</strong></span>
+          <span>{dataMode === "LIVE" ? "Live observation:" : "Scenario time:"} <strong className="font-mono text-ink">{clock(state.updatedAt)} IST</strong></span>
           <span className="text-border">·</span>
           <span>Last Refreshed: <strong className="font-mono text-ink">{clock(state.refreshedAt)} IST</strong></span>
-          <span className="text-muted hidden sm:inline">(Advances +5m per refresh)</span>
+          {dataMode !== "LIVE" && <span className="text-muted hidden sm:inline">(Advances +5m per refresh)</span>}
         </p>
         <div className="flex flex-wrap items-center gap-2">
           <span className={`rounded-full px-2.5 py-1 text-[9px] font-bold tracking-wider ${pulseTone[pulse] ?? "text-muted bg-elevated"}`}><span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-current" />{pulse}</span>
@@ -128,7 +128,7 @@ export default function Overview() {
           </div>
           <div className="flex flex-wrap items-center justify-between gap-2 px-2 pt-2"><MapLegend /><span className="text-[9px] text-muted">MAP © OPENSTREETMAP</span></div>
         </section>
-        <BriefPanel state={state} routeResponse={routeResponse} />
+          <BriefPanel state={state} routeResponse={routeResponse} dataMode={dataMode} />
       </div>
 
       <div className="grid gap-3 xl:grid-cols-12">
@@ -153,7 +153,7 @@ export default function Overview() {
           <div className="space-y-2">
             {feeds.map((feed) => <div key={feed.id} className="flex items-center justify-between gap-2 rounded-lg border border-border bg-inset px-2.5 py-2"><div className="min-w-0"><p className="truncate text-[11px] font-semibold capitalize text-ink">{feed.name ?? feed.id}</p><p className="text-[9px] text-muted">{feed.cadenceMin ? `Scenario cadence ${feed.cadenceMin} min` : "Scenario incident data"}</p></div><span className={`rounded px-1.5 py-0.5 text-[8px] font-bold ${feed.enabled ? "bg-attention/10 text-attention-ink" : "bg-elevated text-muted"}`}>{feed.enabled ? "SIMULATED" : "OFF"}</span></div>)}
           </div>
-          <p className="mt-2 text-[9px] text-muted">Scenario time: {clock(state.updatedAt)} IST · Refreshed: {clock(state.refreshedAt)} IST</p>
+          <p className="mt-2 text-[9px] text-muted">{dataMode === "LIVE" ? "Live observation" : "Scenario time"}: {clock(state.updatedAt)} IST · Refreshed: {clock(state.refreshedAt)} IST</p>
         </section>
       </div>
       {error && <p role="status" className="text-xs text-attention-ink">Refresh failed: {error}</p>}

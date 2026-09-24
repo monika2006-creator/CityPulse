@@ -6,6 +6,7 @@ import { generate, META } from './sim.js';
 import { CITIES as CITY_CONFIGS } from './zones.js';
 import { buildIndex, computeState } from './engine.js';
 import { buildSummary } from './summary.js';
+import { liveSnapshot } from './live.js';
 import { scenarioRoutes, tomtomRoutes, attachTrafficSignals, liveResult, geocode } from './routes.js';
 
 const off = new Set(); // feeds switched off via the demo kill-switch
@@ -33,14 +34,25 @@ app.use(cors());
 app.use(express.json());
 
 app.get('/', (_req, res) => res.json({ name: 'CityPulse API', status: 'running', endpoints: ['/api/health', '/api/state', '/api/feeds'] }));
-app.get('/api/health', (_req, res) => res.json({ ok: true, mode: 'scenario', tomtomKey: !!TOMTOM_KEY(), tomtomCallsToday: calls.n, cities: Object.values(CITY_CONFIGS).map(({ id, name }) => ({ id, name })) }));
+app.get('/api/health', (_req, res) => res.json({ ok: true, mode: 'scenario', tomtomKey: !!TOMTOM_KEY(), weatherProvider: 'Open-Meteo', tomtomCallsToday: calls.n, cities: Object.values(CITY_CONFIGS).map(({ id, name }) => ({ id, name })) }));
 
 // GET /api/state?mode=scenario&min=235   (min = minutes since scenario start; or t=<ISO>)
-app.get('/api/state', (req, res) => {
+app.get('/api/state', async (req, res) => {
   const { min, t, mode, city } = req.query;
   const tMs = t ? Date.parse(t) : META.start + (min !== undefined ? Number(min) : META.defaultMin) * MIN;
   const state = stateAt(Number.isFinite(tMs) ? tMs : META.start + META.defaultMin * MIN, city);
-  if (mode === 'live') state.warnings = ['Live mode is not available yet; serving scenario data.'];
+  if (mode === 'live') {
+    try {
+      const liveState = await liveSnapshot(validCity(city), state, TOMTOM_KEY(), () => {
+        if (calls.day !== new Date().toDateString()) calls = { day: new Date().toDateString(), n: 0 };
+        calls.n++;
+      });
+      liveState.summary = buildSummary(liveState);
+      return res.json(liveState);
+    } catch (e) {
+      state.warnings = [`Live feeds unavailable (${e.message}); showing simulated data.`];
+    }
+  }
   res.json(state);
 });
 
@@ -133,16 +145,20 @@ app.get('/api/routes', async (req, res) => {
     if (from || to) out.warnings = ['Scenario mode only supports the demo journey.'];
     return res.json(out);
   }
-  const f = parsePt(from), t = parsePt(to), key = TOMTOM_KEY();
+  const state = stateAt(Number.isFinite(tMs) ? tMs : META.start + META.defaultMin * MIN, city);
+  const start = state.zones[0], end = state.zones[Math.min(5, state.zones.length - 1)];
+  const f = parsePt(from) ?? (!from && !to ? { lat: start.lat, lng: start.lng } : null);
+  const t = parsePt(to) ?? (!from && !to ? { lat: end.lat, lng: end.lng } : null);
+  const key = TOMTOM_KEY();
   const fallback = (why) => res.json({ ...scenario(), warnings: [`Live routes unavailable (${why}); showing scenario data.`] });
   if (!key) return fallback('no TomTom key');
   if (!f || !t) return res.status(400).json({ error: 'from and to must be "lat,lng"' });
   try {
     const ck = `r:${f.lat.toFixed(4)},${f.lng.toFixed(4)}:${t.lat.toFixed(4)},${t.lng.toFixed(4)}`;
-    const out = await cached(ck, 60_000, async () => {
+    const out = await cached(ck, 5 * 60_000, async () => {
       const routes = await tomtomRoutes(f, t, key);
       await attachTrafficSignals(routes);
-      return liveResult(routes, { from: { name: String(req.query.fromName ?? 'Origin'), ...f }, to: { name: String(req.query.toName ?? 'Destination'), ...t } });
+      return liveResult(routes, { from: { name: String(req.query.fromName ?? start.name), ...f }, to: { name: String(req.query.toName ?? end.name), ...t } });
     });
     res.json(out);
   } catch (e) { fallback(e.message); }
