@@ -1,0 +1,336 @@
+{
+  "mode": "scenario",
+  "now": "2026-09-22T04:40:00.000Z",
+  "range": {
+    "start": "2026-09-22T04:30:00.000Z",
+    "end": "2026-09-22T12:30:00.000Z",
+    "default": "2026-09-22T08:25:00.000Z"
+  },
+  "degraded": false,
+  "missingFeeds": [],
+  "feeds": [
+    {
+      "id": "weather",
+      "name": "Weather",
+      "cadenceMin": 15,
+      "enabled": true,
+      "status": "live",
+      "lastUpdated": "2026-09-22T04:30:00.000Z",
+      "simulated": true
+    },
+    {
+      "id": "traffic",
+      "name": "Traffic",
+      "cadenceMin": 5,
+      "enabled": true,
+      "status": "live",
+      "lastUpdated": "2026-09-22T04:40:00.000Z",
+      "simulated": true
+    },
+    {
+      "id": "incident",
+      "name": "Incidents",
+      "cadenceMin": null,
+      "enabled": true,
+      "status": "live",
+      "lastUpdated": "2026-09-22T04:30:00.000Z",
+      "simulated": true
+    }
+  ],
+  "pulse": {
+    "level": "normal",
+    "label": "NORMAL",
+    "situationCount": 0,
+    "intensity": 0
+  },
+  "snapshot": {
+    "traffic": {
+      "level": "Normal",
+      "avgCongestionPct": 31.1
+    },
+    "weather": {
+      "condition": "Clear",
+      "maxRainfallMmh": 0,
+      "avgTempC": 31
+    },
+    "incidents": {
+      "active": 1
+    }
+  },
+  "zones": [
+    {
+      "zoneId": "mi-road",
+      "name": "MI Road",
+      "lat": 26.9155,
+      "lng": 75.805,
+      "roads": [
+        "MI Road",
+        "Station Road"
+      ],
+      "weather": {
+        "rainfallMmh": 0,
+        "condition": "Clear",
+        "tempC": 31.1,
+        "severity": "normal",
+        "timestamp": "2026-09-22T04:30:00.000Z"
+      },
+      "traffic": {
+        "congestionPct": 36.7,
+        "baselinePct": 38,
+        "ratio": 0.97,
+        "avgSpeedKmh": 27.5,
+        "level": "Normal",
+        "severity": "normal",
+        "timestamp": "2026-09-22T04:40:00.000Z"
+      },
+      "incidents": {
+        "active": 0,
+        "items": []
+      },
+      "signals": [],
+      "signalCount": 0,
+      "severity": "normal",
+      "multiSource": false
+    },
+    {
+      "zoneId": "civil-lines",
+      "name": "Civil Lines",
+      "lat": 26.904,
+      "lng": 75.787,
+      "roads": [
+        "Bhawani Singh Road",
+        "Civil Lines Road"
+      ],
+      "weather": {
+        "rainfallMmh": 0,
+        "condition": "Clear",
+        "tempC": 30.9,
+        "severity": "normal",
+        "timestamp": "2026-09-22T04:30:00.000Z"
+      },
+      "traffic": {
+        "congestionPct": 29.7,
+        "baselinePct": 30,
+        "ratio": 0.99,
+        "avgSpeedKmh": 29.9,
+        "level": "Normal",
+        "severity": "normal",
+        "timestamp": "2026-09-22T04:40:00.000Z"
+      },
+      "incidents": {
+        "active": 0,
+        "items": []
+      },
+      "signals": [],
+      "signalCount": 0,
+      "severity": "normal",
+      "multiSource": false
+    },
+    {
+      "zoneId": "tonk-road",
+      "name": "Tonk Road",
+      "lat": 26.87,
+      "lng": 75.796,
+      "roads": [
+        "Tonk Road",
+        "Gopalpura Bypass"
+      ],
+      "weather": {
+        "rainfallMmh": 0,
+        "condition": "Clear",
+        "tempC": 31.1,
+        "severity": "normal",
+        "timestamp": "2026-09-22T04:30:00.000Z"
+      },
+      "traffic": {
+        "congestionPct": 33.6,
+        "baselinePct": 34,
+        "ratio": 0.99,
+        "avgSpeedKmh": 28.6,
+        "level": "Normal",
+        "severity": "normal",
+        "timestamp": "2026-09-22T04:40:00.000Z"
+      },
+      "incidents": {
+        "active": 0,
+        "items": []
+      },
+      "signals": [],
+      "signalCount": 0,
+      "severity": "normal",
+      "multiSource": false
+    },
+    {
+      "zoneId": "malviya-nagar",
+      "name": "Malviya Nagar",
+      "lat": 26.855,
+      "lng": 75.811,
+      "roads": [
+        "JLN Marg",
+        "Malviya Nagar Main Road"
+      ],
+      "weather": {
+        "rainfallMmh": 0,
+        "condition": "Clear",
+        "tempC": 30.9,
+        "severity": "normal",
+        "timestamp": "2026-09-22T04:30:00.000Z"
+      },
+      "traffic": {
+        "congestionPct": 35,
+        "baselinePct": 32,
+        "ratio": 1.09,
+        "avgSpeedKmh": 28.1,
+        "level": "Normal",
+        "severity": "normal",
+        "timestamp": "2026-09-22T04:40:00.000Z"
+      },
+      "incidents": {
+        "active": 1,
+        "items": [
+          {
+            "id": "evt_00786",
+            "category": "construction",
+            "label": "Road resurfacing works",
+            "severity": "attention",
+            "lat": 26.857,
+            "lng": 75.80900000000001,
+            "timestamp": "2026-09-22T04:30:00.000Z"
+          }
+        ]
+      },
+      "signals": [
+        {
+          "key": "incident:evt_00786",
+          "type": "incident",
+          "source": "incident",
+          "category": "construction",
+          "label": "Road resurfacing works",
+          "severity": "attention",
+          "lat": 26.857,
+          "lng": 75.80900000000001,
+          "since": "2026-09-22T04:30:00.000Z"
+        }
+      ],
+      "signalCount": 1,
+      "severity": "attention",
+      "multiSource": false
+    },
+    {
+      "zoneId": "vaishali-nagar",
+      "name": "Vaishali Nagar",
+      "lat": 26.908,
+      "lng": 75.729,
+      "roads": [
+        "Ajmer Road",
+        "Vaishali Circle Road"
+      ],
+      "weather": {
+        "rainfallMmh": 0,
+        "condition": "Clear",
+        "tempC": 31,
+        "severity": "normal",
+        "timestamp": "2026-09-22T04:30:00.000Z"
+      },
+      "traffic": {
+        "congestionPct": 28.8,
+        "baselinePct": 28,
+        "ratio": 1.03,
+        "avgSpeedKmh": 30.2,
+        "level": "Normal",
+        "severity": "normal",
+        "timestamp": "2026-09-22T04:40:00.000Z"
+      },
+      "incidents": {
+        "active": 0,
+        "items": []
+      },
+      "signals": [],
+      "signalCount": 0,
+      "severity": "normal",
+      "multiSource": false
+    },
+    {
+      "zoneId": "sanganer-airport",
+      "name": "Sanganer / Airport",
+      "lat": 26.8242,
+      "lng": 75.8122,
+      "roads": [
+        "Airport Road",
+        "Tonk Road"
+      ],
+      "weather": {
+        "rainfallMmh": 0,
+        "condition": "Clear",
+        "tempC": 30.9,
+        "severity": "normal",
+        "timestamp": "2026-09-22T04:30:00.000Z"
+      },
+      "traffic": {
+        "congestionPct": 22.6,
+        "baselinePct": 22,
+        "ratio": 1.03,
+        "avgSpeedKmh": 32.3,
+        "level": "Normal",
+        "severity": "normal",
+        "timestamp": "2026-09-22T04:40:00.000Z"
+      },
+      "incidents": {
+        "active": 0,
+        "items": []
+      },
+      "signals": [],
+      "signalCount": 0,
+      "severity": "normal",
+      "multiSource": false
+    }
+  ],
+  "situations": [],
+  "anomalies": [
+    {
+      "zoneId": "malviya-nagar",
+      "name": "Malviya Nagar",
+      "severity": "attention",
+      "signals": [
+        {
+          "key": "incident:evt_00786",
+          "type": "incident",
+          "source": "incident",
+          "category": "construction",
+          "label": "Road resurfacing works",
+          "severity": "attention",
+          "lat": 26.857,
+          "lng": 75.80900000000001,
+          "since": "2026-09-22T04:30:00.000Z"
+        }
+      ],
+      "title": "Incident anomaly"
+    }
+  ],
+  "insights": {
+    "zoneCounts": {
+      "normal": 5,
+      "attention": 1,
+      "critical": 0
+    },
+    "activeSituations": 0,
+    "resolvedSituations": 0,
+    "patterns": []
+  },
+  "trends": [
+    {
+      "t": "2026-09-22T04:40:00.000Z",
+      "avgCongestionPct": 31.1,
+      "avgBaselinePct": 30.7,
+      "activeIncidents": 1,
+      "avgRainfallMmh": 0,
+      "situations": 0
+    }
+  ],
+  "summary": {
+    "level": "NORMAL",
+    "headline": "Conditions are normal",
+    "text": "No multi-signal situations, but 1 single-signal anomaly noted: Incident anomaly (Malviya Nagar).",
+    "generatedBy": "template"
+  }
+}

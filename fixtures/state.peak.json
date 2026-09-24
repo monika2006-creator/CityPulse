@@ -1,0 +1,899 @@
+{
+  "mode": "scenario",
+  "now": "2026-09-22T08:25:00.000Z",
+  "range": {
+    "start": "2026-09-22T04:30:00.000Z",
+    "end": "2026-09-22T12:30:00.000Z",
+    "default": "2026-09-22T08:25:00.000Z"
+  },
+  "degraded": false,
+  "missingFeeds": [],
+  "feeds": [
+    {
+      "id": "weather",
+      "name": "Weather",
+      "cadenceMin": 15,
+      "enabled": true,
+      "status": "live",
+      "lastUpdated": "2026-09-22T08:15:00.000Z",
+      "simulated": true
+    },
+    {
+      "id": "traffic",
+      "name": "Traffic",
+      "cadenceMin": 5,
+      "enabled": true,
+      "status": "live",
+      "lastUpdated": "2026-09-22T08:25:00.000Z",
+      "simulated": true
+    },
+    {
+      "id": "incident",
+      "name": "Incidents",
+      "cadenceMin": null,
+      "enabled": true,
+      "status": "live",
+      "lastUpdated": "2026-09-22T08:05:00.000Z",
+      "simulated": true
+    }
+  ],
+  "pulse": {
+    "level": "critical",
+    "label": "CRITICAL",
+    "situationCount": 3,
+    "intensity": 0.67
+  },
+  "snapshot": {
+    "traffic": {
+      "level": "Elevated",
+      "avgCongestionPct": 43.9
+    },
+    "weather": {
+      "condition": "Rain",
+      "maxRainfallMmh": 7,
+      "avgTempC": 29.1
+    },
+    "incidents": {
+      "active": 5
+    }
+  },
+  "zones": [
+    {
+      "zoneId": "mi-road",
+      "name": "MI Road",
+      "lat": 26.9155,
+      "lng": 75.805,
+      "roads": [
+        "MI Road",
+        "Station Road"
+      ],
+      "weather": {
+        "rainfallMmh": 7,
+        "condition": "Rain",
+        "tempC": 26.7,
+        "severity": "attention",
+        "timestamp": "2026-09-22T08:15:00.000Z"
+      },
+      "traffic": {
+        "congestionPct": 66.5,
+        "baselinePct": 38,
+        "ratio": 1.75,
+        "avgSpeedKmh": 17.4,
+        "level": "Elevated",
+        "severity": "attention",
+        "timestamp": "2026-09-22T08:25:00.000Z"
+      },
+      "incidents": {
+        "active": 2,
+        "items": [
+          {
+            "id": "evt_00784",
+            "category": "obstruction",
+            "label": "Waterlogging on carriageway",
+            "severity": "attention",
+            "lat": 26.9185,
+            "lng": 75.808,
+            "timestamp": "2026-09-22T07:55:00.000Z"
+          },
+          {
+            "id": "evt_00785",
+            "category": "accident",
+            "label": "Minor collision",
+            "severity": "attention",
+            "lat": 26.913500000000003,
+            "lng": 75.801,
+            "timestamp": "2026-09-22T08:05:00.000Z"
+          }
+        ]
+      },
+      "signals": [
+        {
+          "key": "rainfall",
+          "type": "rainfall",
+          "source": "weather",
+          "label": "Rain (7 mm/h)",
+          "severity": "attention",
+          "value": 7,
+          "unit": "mm/h"
+        },
+        {
+          "key": "traffic",
+          "type": "traffic",
+          "source": "traffic",
+          "label": "Traffic at 66.5% vs 38% typical",
+          "severity": "attention",
+          "value": 66.5,
+          "unit": "%",
+          "baseline": 38,
+          "ratio": 1.75
+        },
+        {
+          "key": "incident:evt_00784",
+          "type": "incident",
+          "source": "incident",
+          "category": "obstruction",
+          "label": "Waterlogging on carriageway",
+          "severity": "attention",
+          "lat": 26.9185,
+          "lng": 75.808,
+          "since": "2026-09-22T07:55:00.000Z"
+        },
+        {
+          "key": "incident:evt_00785",
+          "type": "incident",
+          "source": "incident",
+          "category": "accident",
+          "label": "Minor collision",
+          "severity": "attention",
+          "lat": 26.913500000000003,
+          "lng": 75.801,
+          "since": "2026-09-22T08:05:00.000Z"
+        }
+      ],
+      "signalCount": 4,
+      "severity": "attention",
+      "multiSource": true
+    },
+    {
+      "zoneId": "civil-lines",
+      "name": "Civil Lines",
+      "lat": 26.904,
+      "lng": 75.787,
+      "roads": [
+        "Bhawani Singh Road",
+        "Civil Lines Road"
+      ],
+      "weather": {
+        "rainfallMmh": 5.8,
+        "condition": "Rain",
+        "tempC": 27.4,
+        "severity": "attention",
+        "timestamp": "2026-09-22T08:15:00.000Z"
+      },
+      "traffic": {
+        "congestionPct": 47.4,
+        "baselinePct": 30,
+        "ratio": 1.58,
+        "avgSpeedKmh": 23.9,
+        "level": "Elevated",
+        "severity": "attention",
+        "timestamp": "2026-09-22T08:25:00.000Z"
+      },
+      "incidents": {
+        "active": 0,
+        "items": []
+      },
+      "signals": [
+        {
+          "key": "rainfall",
+          "type": "rainfall",
+          "source": "weather",
+          "label": "Rain (5.8 mm/h)",
+          "severity": "attention",
+          "value": 5.8,
+          "unit": "mm/h"
+        },
+        {
+          "key": "traffic",
+          "type": "traffic",
+          "source": "traffic",
+          "label": "Traffic at 47.4% vs 30% typical",
+          "severity": "attention",
+          "value": 47.4,
+          "unit": "%",
+          "baseline": 30,
+          "ratio": 1.58
+        }
+      ],
+      "signalCount": 2,
+      "severity": "attention",
+      "multiSource": true
+    },
+    {
+      "zoneId": "tonk-road",
+      "name": "Tonk Road",
+      "lat": 26.87,
+      "lng": 75.796,
+      "roads": [
+        "Tonk Road",
+        "Gopalpura Bypass"
+      ],
+      "weather": {
+        "rainfallMmh": 2.2,
+        "condition": "Light rain",
+        "tempC": 29.6,
+        "severity": "normal",
+        "timestamp": "2026-09-22T08:15:00.000Z"
+      },
+      "traffic": {
+        "congestionPct": 57.4,
+        "baselinePct": 34,
+        "ratio": 1.69,
+        "avgSpeedKmh": 20.5,
+        "level": "Elevated",
+        "severity": "attention",
+        "timestamp": "2026-09-22T08:25:00.000Z"
+      },
+      "incidents": {
+        "active": 2,
+        "items": [
+          {
+            "id": "evt_00782",
+            "category": "accident",
+            "label": "Multi-vehicle collision",
+            "severity": "critical",
+            "lat": 26.874000000000002,
+            "lng": 75.793,
+            "timestamp": "2026-09-22T07:20:00.000Z"
+          },
+          {
+            "id": "evt_00783",
+            "category": "closure",
+            "label": "Lane closure for recovery work",
+            "severity": "attention",
+            "lat": 26.867,
+            "lng": 75.80000000000001,
+            "timestamp": "2026-09-22T07:35:00.000Z"
+          }
+        ]
+      },
+      "signals": [
+        {
+          "key": "traffic",
+          "type": "traffic",
+          "source": "traffic",
+          "label": "Traffic at 57.4% vs 34% typical",
+          "severity": "attention",
+          "value": 57.4,
+          "unit": "%",
+          "baseline": 34,
+          "ratio": 1.69
+        },
+        {
+          "key": "incident:evt_00782",
+          "type": "incident",
+          "source": "incident",
+          "category": "accident",
+          "label": "Multi-vehicle collision",
+          "severity": "critical",
+          "lat": 26.874000000000002,
+          "lng": 75.793,
+          "since": "2026-09-22T07:20:00.000Z"
+        },
+        {
+          "key": "incident:evt_00783",
+          "type": "incident",
+          "source": "incident",
+          "category": "closure",
+          "label": "Lane closure for recovery work",
+          "severity": "attention",
+          "lat": 26.867,
+          "lng": 75.80000000000001,
+          "since": "2026-09-22T07:35:00.000Z"
+        }
+      ],
+      "signalCount": 3,
+      "severity": "critical",
+      "multiSource": true
+    },
+    {
+      "zoneId": "malviya-nagar",
+      "name": "Malviya Nagar",
+      "lat": 26.855,
+      "lng": 75.811,
+      "roads": [
+        "JLN Marg",
+        "Malviya Nagar Main Road"
+      ],
+      "weather": {
+        "rainfallMmh": 1.4,
+        "condition": "Light rain",
+        "tempC": 30.3,
+        "severity": "normal",
+        "timestamp": "2026-09-22T08:15:00.000Z"
+      },
+      "traffic": {
+        "congestionPct": 39,
+        "baselinePct": 32,
+        "ratio": 1.22,
+        "avgSpeedKmh": 26.7,
+        "level": "Normal",
+        "severity": "normal",
+        "timestamp": "2026-09-22T08:25:00.000Z"
+      },
+      "incidents": {
+        "active": 1,
+        "items": [
+          {
+            "id": "evt_00786",
+            "category": "construction",
+            "label": "Road resurfacing works",
+            "severity": "attention",
+            "lat": 26.857,
+            "lng": 75.80900000000001,
+            "timestamp": "2026-09-22T04:30:00.000Z"
+          }
+        ]
+      },
+      "signals": [
+        {
+          "key": "incident:evt_00786",
+          "type": "incident",
+          "source": "incident",
+          "category": "construction",
+          "label": "Road resurfacing works",
+          "severity": "attention",
+          "lat": 26.857,
+          "lng": 75.80900000000001,
+          "since": "2026-09-22T04:30:00.000Z"
+        }
+      ],
+      "signalCount": 1,
+      "severity": "attention",
+      "multiSource": false
+    },
+    {
+      "zoneId": "vaishali-nagar",
+      "name": "Vaishali Nagar",
+      "lat": 26.908,
+      "lng": 75.729,
+      "roads": [
+        "Ajmer Road",
+        "Vaishali Circle Road"
+      ],
+      "weather": {
+        "rainfallMmh": 1.3,
+        "condition": "Light rain",
+        "tempC": 30.3,
+        "severity": "normal",
+        "timestamp": "2026-09-22T08:15:00.000Z"
+      },
+      "traffic": {
+        "congestionPct": 30.5,
+        "baselinePct": 28,
+        "ratio": 1.09,
+        "avgSpeedKmh": 29.6,
+        "level": "Normal",
+        "severity": "normal",
+        "timestamp": "2026-09-22T08:25:00.000Z"
+      },
+      "incidents": {
+        "active": 0,
+        "items": []
+      },
+      "signals": [],
+      "signalCount": 0,
+      "severity": "normal",
+      "multiSource": false
+    },
+    {
+      "zoneId": "sanganer-airport",
+      "name": "Sanganer / Airport",
+      "lat": 26.8242,
+      "lng": 75.8122,
+      "roads": [
+        "Airport Road",
+        "Tonk Road"
+      ],
+      "weather": {
+        "rainfallMmh": 0.9,
+        "condition": "Light rain",
+        "tempC": 30.4,
+        "severity": "normal",
+        "timestamp": "2026-09-22T08:15:00.000Z"
+      },
+      "traffic": {
+        "congestionPct": 22.9,
+        "baselinePct": 22,
+        "ratio": 1.04,
+        "avgSpeedKmh": 32.2,
+        "level": "Normal",
+        "severity": "normal",
+        "timestamp": "2026-09-22T08:25:00.000Z"
+      },
+      "incidents": {
+        "active": 0,
+        "items": []
+      },
+      "signals": [],
+      "signalCount": 0,
+      "severity": "normal",
+      "multiSource": false
+    }
+  ],
+  "situations": [
+    {
+      "id": "sit-tonk-road-1790063100000",
+      "zoneId": "tonk-road",
+      "location": "Tonk Road",
+      "title": "Road incident",
+      "severity": "critical",
+      "status": "active",
+      "detectedAt": "2026-09-22T07:45:00.000Z",
+      "resolvedAt": null,
+      "signals": [
+        {
+          "key": "traffic",
+          "type": "traffic",
+          "source": "traffic",
+          "label": "Traffic at 57.4% vs 34% typical",
+          "severity": "attention",
+          "value": 57.4,
+          "unit": "%",
+          "baseline": 34,
+          "ratio": 1.69
+        },
+        {
+          "key": "incident:evt_00782",
+          "type": "incident",
+          "source": "incident",
+          "category": "accident",
+          "label": "Multi-vehicle collision",
+          "severity": "critical",
+          "lat": 26.874000000000002,
+          "lng": 75.793,
+          "since": "2026-09-22T07:20:00.000Z"
+        },
+        {
+          "key": "incident:evt_00783",
+          "type": "incident",
+          "source": "incident",
+          "category": "closure",
+          "label": "Lane closure for recovery work",
+          "severity": "attention",
+          "lat": 26.867,
+          "lng": 75.80000000000001,
+          "since": "2026-09-22T07:35:00.000Z"
+        }
+      ],
+      "signalCount": 3,
+      "summary": "2 active incident reports coincided with increased traffic around Tonk Road.",
+      "correlation": {
+        "label": "POSSIBLE CORRELATION",
+        "text": "Incident reports and traffic changed within the same area and time window and may be related. No cause is confirmed.",
+        "lagMinutes": 0,
+        "chain": [
+          {
+            "type": "incident",
+            "label": "Incidents ↑",
+            "at": "2026-09-22T07:20:00.000Z"
+          },
+          {
+            "type": "traffic",
+            "label": "Traffic ↑",
+            "at": "2026-09-22T07:45:00.000Z"
+          }
+        ]
+      },
+      "timeline": [
+        {
+          "type": "incident",
+          "label": "Incidents ↑",
+          "at": "2026-09-22T07:20:00.000Z"
+        },
+        {
+          "type": "traffic",
+          "label": "Traffic ↑",
+          "at": "2026-09-22T07:45:00.000Z"
+        }
+      ],
+      "why": "Flagged because 3 signals from 2 different feeds changed in Tonk Road within the same 30-minute window: Traffic at 57.4% vs 34% typical; Multi-vehicle collision; Lane closure for recovery work. Several signals moving together in one area is a pattern worth a look, not proof that one caused another."
+    },
+    {
+      "id": "sit-civil-lines-1790063700000",
+      "zoneId": "civil-lines",
+      "location": "Civil Lines",
+      "title": "Unusual rainfall",
+      "severity": "attention",
+      "status": "active",
+      "detectedAt": "2026-09-22T07:55:00.000Z",
+      "resolvedAt": null,
+      "signals": [
+        {
+          "key": "rainfall",
+          "type": "rainfall",
+          "source": "weather",
+          "label": "Rain (5.8 mm/h)",
+          "severity": "attention",
+          "value": 5.8,
+          "unit": "mm/h"
+        },
+        {
+          "key": "traffic",
+          "type": "traffic",
+          "source": "traffic",
+          "label": "Traffic at 47.4% vs 30% typical",
+          "severity": "attention",
+          "value": 47.4,
+          "unit": "%",
+          "baseline": 30,
+          "ratio": 1.58
+        }
+      ],
+      "signalCount": 2,
+      "summary": "Moderate rainfall coincided with increased traffic around Civil Lines.",
+      "correlation": {
+        "label": "POSSIBLE CORRELATION",
+        "text": "Rainfall and traffic increased within the same area and time window, with traffic rising about 10 min after rainfall. This is a possible correlation, not a confirmed cause.",
+        "lagMinutes": 10,
+        "chain": [
+          {
+            "type": "rainfall",
+            "label": "Rainfall ↑",
+            "at": "2026-09-22T07:45:00.000Z"
+          },
+          {
+            "type": "traffic",
+            "label": "Traffic ↑",
+            "at": "2026-09-22T07:55:00.000Z"
+          }
+        ]
+      },
+      "timeline": [
+        {
+          "type": "rainfall",
+          "label": "Rainfall ↑",
+          "at": "2026-09-22T07:45:00.000Z"
+        },
+        {
+          "type": "traffic",
+          "label": "Traffic ↑",
+          "at": "2026-09-22T07:55:00.000Z"
+        }
+      ],
+      "why": "Flagged because 2 signals from 2 different feeds changed in Civil Lines within the same 30-minute window: Rain (5.8 mm/h); Traffic at 47.4% vs 30% typical. Several signals moving together in one area is a pattern worth a look, not proof that one caused another."
+    },
+    {
+      "id": "sit-mi-road-1790063400000",
+      "zoneId": "mi-road",
+      "location": "MI Road",
+      "title": "Weather-related traffic disruption",
+      "severity": "attention",
+      "status": "active",
+      "detectedAt": "2026-09-22T07:50:00.000Z",
+      "resolvedAt": null,
+      "signals": [
+        {
+          "key": "rainfall",
+          "type": "rainfall",
+          "source": "weather",
+          "label": "Rain (7 mm/h)",
+          "severity": "attention",
+          "value": 7,
+          "unit": "mm/h"
+        },
+        {
+          "key": "traffic",
+          "type": "traffic",
+          "source": "traffic",
+          "label": "Traffic at 66.5% vs 38% typical",
+          "severity": "attention",
+          "value": 66.5,
+          "unit": "%",
+          "baseline": 38,
+          "ratio": 1.75
+        },
+        {
+          "key": "incident:evt_00784",
+          "type": "incident",
+          "source": "incident",
+          "category": "obstruction",
+          "label": "Waterlogging on carriageway",
+          "severity": "attention",
+          "lat": 26.9185,
+          "lng": 75.808,
+          "since": "2026-09-22T07:55:00.000Z"
+        },
+        {
+          "key": "incident:evt_00785",
+          "type": "incident",
+          "source": "incident",
+          "category": "accident",
+          "label": "Minor collision",
+          "severity": "attention",
+          "lat": 26.913500000000003,
+          "lng": 75.801,
+          "since": "2026-09-22T08:05:00.000Z"
+        }
+      ],
+      "signalCount": 4,
+      "summary": "Moderate rainfall coincided with increased traffic and 2 active incident reports around MI Road.",
+      "correlation": {
+        "label": "POSSIBLE CORRELATION",
+        "text": "Rainfall and traffic increased within the same area and time window, with traffic rising about 20 min after rainfall. This is a possible correlation, not a confirmed cause.",
+        "lagMinutes": 20,
+        "chain": [
+          {
+            "type": "rainfall",
+            "label": "Rainfall ↑",
+            "at": "2026-09-22T07:30:00.000Z"
+          },
+          {
+            "type": "traffic",
+            "label": "Traffic ↑",
+            "at": "2026-09-22T07:50:00.000Z"
+          },
+          {
+            "type": "incident",
+            "label": "Incidents ↑",
+            "at": "2026-09-22T07:55:00.000Z"
+          }
+        ]
+      },
+      "timeline": [
+        {
+          "type": "rainfall",
+          "label": "Rainfall ↑",
+          "at": "2026-09-22T07:30:00.000Z"
+        },
+        {
+          "type": "traffic",
+          "label": "Traffic ↑",
+          "at": "2026-09-22T07:50:00.000Z"
+        },
+        {
+          "type": "incident",
+          "label": "Incidents ↑",
+          "at": "2026-09-22T07:55:00.000Z"
+        }
+      ],
+      "why": "Flagged because 4 signals from 3 different feeds changed in MI Road within the same 30-minute window: Rain (7 mm/h); Traffic at 66.5% vs 38% typical; Waterlogging on carriageway; Minor collision. Several signals moving together in one area is a pattern worth a look, not proof that one caused another."
+    },
+    {
+      "id": "sit-vaishali-nagar-1790053800000",
+      "zoneId": "vaishali-nagar",
+      "location": "Vaishali Nagar",
+      "title": "Traffic disruption",
+      "severity": "attention",
+      "status": "resolved",
+      "detectedAt": "2026-09-22T05:10:00.000Z",
+      "resolvedAt": "2026-09-22T06:05:00.000Z",
+      "signals": [
+        {
+          "key": "traffic",
+          "type": "traffic",
+          "source": "traffic",
+          "label": "Traffic at 39.6% vs 28% typical",
+          "severity": "attention",
+          "value": 39.6,
+          "unit": "%",
+          "baseline": 28,
+          "ratio": 1.41
+        },
+        {
+          "key": "incident:evt_00781",
+          "type": "incident",
+          "source": "incident",
+          "category": "closure",
+          "label": "Road closure for water main repair",
+          "severity": "attention",
+          "lat": 26.911,
+          "lng": 75.731,
+          "since": "2026-09-22T05:00:00.000Z"
+        }
+      ],
+      "signalCount": 2,
+      "summary": "1 active incident report coincided with increased traffic around Vaishali Nagar.",
+      "correlation": {
+        "label": "POSSIBLE CORRELATION",
+        "text": "Incident reports and traffic changed within the same area and time window and may be related. No cause is confirmed.",
+        "lagMinutes": 0,
+        "chain": [
+          {
+            "type": "incident",
+            "label": "Incidents ↑",
+            "at": "2026-09-22T05:00:00.000Z"
+          },
+          {
+            "type": "traffic",
+            "label": "Traffic ↑",
+            "at": "2026-09-22T05:10:00.000Z"
+          }
+        ]
+      },
+      "timeline": [
+        {
+          "type": "incident",
+          "label": "Incidents ↑",
+          "at": "2026-09-22T05:00:00.000Z"
+        },
+        {
+          "type": "traffic",
+          "label": "Traffic ↑",
+          "at": "2026-09-22T05:10:00.000Z"
+        }
+      ],
+      "why": "Flagged because 2 signals from 2 different feeds changed in Vaishali Nagar within the same 30-minute window: Traffic at 39.6% vs 28% typical; Road closure for water main repair. Several signals moving together in one area is a pattern worth a look, not proof that one caused another."
+    }
+  ],
+  "anomalies": [
+    {
+      "zoneId": "malviya-nagar",
+      "name": "Malviya Nagar",
+      "severity": "attention",
+      "signals": [
+        {
+          "key": "incident:evt_00786",
+          "type": "incident",
+          "source": "incident",
+          "category": "construction",
+          "label": "Road resurfacing works",
+          "severity": "attention",
+          "lat": 26.857,
+          "lng": 75.80900000000001,
+          "since": "2026-09-22T04:30:00.000Z"
+        }
+      ],
+      "title": "Incident anomaly"
+    }
+  ],
+  "insights": {
+    "zoneCounts": {
+      "normal": 2,
+      "attention": 3,
+      "critical": 1
+    },
+    "activeSituations": 3,
+    "resolvedSituations": 1,
+    "patterns": [
+      "Rainfall coincided with a traffic slowdown around Civil Lines.",
+      "Rainfall coincided with a traffic slowdown around MI Road."
+    ]
+  },
+  "trends": [
+    {
+      "t": "2026-09-22T04:40:00.000Z",
+      "avgCongestionPct": 31.1,
+      "avgBaselinePct": 30.7,
+      "activeIncidents": 1,
+      "avgRainfallMmh": 0,
+      "situations": 0
+    },
+    {
+      "t": "2026-09-22T04:55:00.000Z",
+      "avgCongestionPct": 31,
+      "avgBaselinePct": 30.7,
+      "activeIncidents": 1,
+      "avgRainfallMmh": 0,
+      "situations": 0
+    },
+    {
+      "t": "2026-09-22T05:10:00.000Z",
+      "avgCongestionPct": 32.9,
+      "avgBaselinePct": 30.7,
+      "activeIncidents": 2,
+      "avgRainfallMmh": 0,
+      "situations": 1
+    },
+    {
+      "t": "2026-09-22T05:25:00.000Z",
+      "avgCongestionPct": 33,
+      "avgBaselinePct": 30.7,
+      "activeIncidents": 2,
+      "avgRainfallMmh": 0,
+      "situations": 1
+    },
+    {
+      "t": "2026-09-22T05:40:00.000Z",
+      "avgCongestionPct": 33.1,
+      "avgBaselinePct": 30.7,
+      "activeIncidents": 2,
+      "avgRainfallMmh": 0,
+      "situations": 1
+    },
+    {
+      "t": "2026-09-22T05:55:00.000Z",
+      "avgCongestionPct": 33.2,
+      "avgBaselinePct": 30.7,
+      "activeIncidents": 2,
+      "avgRainfallMmh": 0,
+      "situations": 1
+    },
+    {
+      "t": "2026-09-22T06:10:00.000Z",
+      "avgCongestionPct": 33.1,
+      "avgBaselinePct": 30.7,
+      "activeIncidents": 1,
+      "avgRainfallMmh": 0,
+      "situations": 0
+    },
+    {
+      "t": "2026-09-22T06:25:00.000Z",
+      "avgCongestionPct": 31.6,
+      "avgBaselinePct": 30.7,
+      "activeIncidents": 1,
+      "avgRainfallMmh": 0,
+      "situations": 0
+    },
+    {
+      "t": "2026-09-22T06:40:00.000Z",
+      "avgCongestionPct": 30.6,
+      "avgBaselinePct": 30.7,
+      "activeIncidents": 1,
+      "avgRainfallMmh": 0,
+      "situations": 0
+    },
+    {
+      "t": "2026-09-22T06:55:00.000Z",
+      "avgCongestionPct": 31.1,
+      "avgBaselinePct": 30.7,
+      "activeIncidents": 1,
+      "avgRainfallMmh": 0,
+      "situations": 0
+    },
+    {
+      "t": "2026-09-22T07:10:00.000Z",
+      "avgCongestionPct": 31.2,
+      "avgBaselinePct": 30.7,
+      "activeIncidents": 1,
+      "avgRainfallMmh": 0,
+      "situations": 0
+    },
+    {
+      "t": "2026-09-22T07:25:00.000Z",
+      "avgCongestionPct": 31.9,
+      "avgBaselinePct": 30.7,
+      "activeIncidents": 2,
+      "avgRainfallMmh": 0.4,
+      "situations": 0
+    },
+    {
+      "t": "2026-09-22T07:40:00.000Z",
+      "avgCongestionPct": 35.2,
+      "avgBaselinePct": 30.7,
+      "activeIncidents": 3,
+      "avgRainfallMmh": 1,
+      "situations": 0
+    },
+    {
+      "t": "2026-09-22T07:55:00.000Z",
+      "avgCongestionPct": 38.6,
+      "avgBaselinePct": 30.7,
+      "activeIncidents": 4,
+      "avgRainfallMmh": 1.8,
+      "situations": 3
+    },
+    {
+      "t": "2026-09-22T08:10:00.000Z",
+      "avgCongestionPct": 41.7,
+      "avgBaselinePct": 30.7,
+      "activeIncidents": 5,
+      "avgRainfallMmh": 2.5,
+      "situations": 3
+    },
+    {
+      "t": "2026-09-22T08:25:00.000Z",
+      "avgCongestionPct": 43.9,
+      "avgBaselinePct": 30.7,
+      "activeIncidents": 5,
+      "avgRainfallMmh": 3.1,
+      "situations": 3
+    }
+  ],
+  "summary": {
+    "level": "CRITICAL",
+    "headline": "3 situations detected",
+    "text": "Most significant: Road incident at Tonk Road (critical). 2 active incident reports coincided with increased traffic around Tonk Road. 2 other situations active: Unusual rainfall (Civil Lines), Weather-related traffic disruption (MI Road).",
+    "generatedBy": "template"
+  }
+}

@@ -1,0 +1,207 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Fonts (Manrope + JetBrains Mono) are loaded once, from index.html. */
+
+/* ---------------------------------------------------------------------------
+   Theme tokens — the single source of truth for both themes.
+   Colours are "R G B" channels so Tailwind can apply opacity (bg-cyan/10).
+   Dark is the default; light applies when <html data-theme="light">.
+   --------------------------------------------------------------------------- */
+:root {
+  color-scheme: dark;
+
+  /* surfaces */
+  --c-bg: 7 11 20; /* #070B14 */
+  --c-sidebar: 11 17 32; /* #0B1120 */
+  --c-surface: 15 23 42; /* #0F172A */
+  --c-elevated: 20 30 51; /* #141E33 */
+  --c-inset: 12 18 33; /* recessed panel inside a card */
+  --c-border: 30 41 59; /* #1E293B */
+  --c-line: 42 58 85; /* stronger border: hover, unselected controls */
+
+  /* text */
+  --c-ink: 248 250 252; /* #F8FAFC */
+  --c-muted: 148 163 184; /* #94A3B8 */
+
+  /* accents: base (fills, icons, borders) and -ink (text-safe) */
+  --c-cyan: 34 211 238; /* #22D3EE  live data */
+  --c-cyan-ink: 34 211 238;
+  --c-action: 59 130 246; /* #3B82F6  actions */
+  --c-violet: 139 92 246; /* #8B5CF6  intelligence */
+  --c-violet-ink: 167 139 250; /* #A78BFA */
+
+  /* severity */
+  --c-normal: 52 211 153; /* #34D399 */
+  --c-normal-ink: 52 211 153;
+  --c-attention: 251 191 36; /* #FBBF24 */
+  --c-attention-ink: 251 191 36;
+  --c-critical: 251 113 133; /* #FB7185 */
+  --c-critical-ink: 251 113 133;
+
+  /* elevation */
+  --shadow-card: none;
+  --shadow-lift: 0 8px 24px -12px rgb(0 0 0 / 0.6);
+  --shadow-float: 0 14px 36px -14px rgb(0 0 0 / 0.7);
+  --shadow-selected: 0 0 0 1px rgb(var(--c-cyan) / 0.16), 0 10px 28px -16px rgb(var(--c-cyan) / 0.25);
+  --shadow-active: 0 0 0 1px rgb(var(--c-cyan) / 0.16);
+  --shadow-focus: 0 0 0 3px rgb(var(--c-cyan) / 0.12);
+  --shadow-dot: 0 0 6px 1px rgb(var(--c-cyan) / 0.5);
+  --scrim: rgb(0 0 0 / 0.7);
+
+  /* page backdrop and decorative grid */
+  --page-glow: radial-gradient(circle at 75% 10%, rgb(var(--c-cyan) / 0.07), transparent 30%);
+  --grid-line: rgb(var(--c-border) / 0.6);
+  --panel-glow: radial-gradient(circle at center, rgb(var(--c-cyan) / 0.09), transparent 55%);
+
+  /* scrollbar */
+  --scroll-thumb: 30 41 59;
+  --scroll-thumb-hover: 39 52 73;
+
+  /* map (see MapView.css) */
+  --map-tile-filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.92) saturate(0.55);
+  --map-vignette: inset 0 0 70px 6px rgb(var(--c-bg) / 0.65);
+  --map-marker-ring: var(--c-bg);
+  --map-marker-shadow: 0 2px 8px rgb(0 0 0 / 0.55);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --c-bg: 248 250 252; /* #F8FAFC */
+  --c-sidebar: 255 255 255; /* #FFFFFF */
+  --c-surface: 255 255 255; /* #FFFFFF */
+  --c-elevated: 241 245 249; /* #F1F5F9 */
+  --c-inset: 248 250 252;
+  --c-border: 226 232 240; /* #E2E8F0 */
+  --c-line: 203 213 225; /* #CBD5E1 */
+
+  --c-ink: 15 23 42; /* #0F172A */
+  --c-muted: 94 110 133; /* #5E6E85 — spec #64748B darkened slightly so muted text passes AA on elevated surfaces */
+
+  --c-cyan: 8 145 178; /* #0891B2 */
+  --c-cyan-ink: 14 116 144; /* #0E7490 */
+  --c-action: 37 99 235; /* #2563EB */
+  --c-violet: 124 58 237; /* #7C3AED */
+  --c-violet-ink: 109 40 217; /* #6D28D9 */
+
+  --c-normal: 5 150 105; /* #059669 */
+  --c-normal-ink: 4 120 87; /* #047857 */
+  --c-attention: 217 119 6; /* #D97706 */
+  --c-attention-ink: 180 83 9; /* #B45309 */
+  --c-critical: 225 29 72; /* #E11D48 */
+  --c-critical-ink: 190 18 60; /* #BE123C */
+
+  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 1px 3px rgb(15 23 42 / 0.06);
+  --shadow-lift: 0 8px 20px -10px rgb(15 23 42 / 0.18);
+  --shadow-float: 0 12px 32px -12px rgb(15 23 42 / 0.2);
+  --shadow-selected: 0 0 0 1px rgb(var(--c-cyan) / 0.22), 0 8px 22px -14px rgb(15 23 42 / 0.25);
+  --shadow-active: 0 0 0 1px rgb(var(--c-cyan) / 0.2);
+  --shadow-focus: 0 0 0 3px rgb(var(--c-cyan) / 0.16);
+  --shadow-dot: none;
+  --scrim: rgb(15 23 42 / 0.45);
+
+  --page-glow: none;
+  --grid-line: rgb(var(--c-border) / 0.9);
+  --panel-glow: radial-gradient(circle at center, rgb(var(--c-cyan) / 0.07), transparent 55%);
+
+  --scroll-thumb: 203 213 225;
+  --scroll-thumb-hover: 178 190 205;
+
+  --map-tile-filter: none;
+  --map-vignette: none;
+  --map-marker-ring: var(--c-surface);
+  --map-marker-shadow: 0 1px 5px rgb(15 23 42 / 0.3);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: rgb(var(--c-bg));
+  background-image: var(--page-glow);
+  background-attachment: fixed;
+  color: rgb(var(--c-ink));
+  font-family: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+.font-mono,
+.tabular {
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Decorative panels (Overview placeholder) */
+.cp-grid-bg {
+  background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 28px 28px;
+  background-position: center;
+}
+
+.cp-panel-glow {
+  background: var(--panel-glow);
+}
+
+/* Scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(var(--scroll-thumb)) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgb(var(--scroll-thumb));
+  border-radius: 8px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(var(--scroll-thumb-hover));
+}
+
+/* Visible keyboard focus in both themes */
+:focus-visible {
+  outline: 2px solid rgb(var(--c-cyan));
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Theme switch: for ~250 ms after the toggle, colours ease instead of snapping.
+   Added by ThemeProvider only on a user toggle — never on load, and never on hover,
+   so it cannot interfere with the components' own transitions. */
+:root[data-theme-switching] *,
+:root[data-theme-switching] *::before,
+:root[data-theme-switching] *::after {
+  transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease,
+    fill 200ms ease, stroke 200ms ease, box-shadow 200ms ease !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme-switching] *,
+  :root[data-theme-switching] *::before,
+  :root[data-theme-switching] *::after {
+    transition: none !important;
+  }
+}

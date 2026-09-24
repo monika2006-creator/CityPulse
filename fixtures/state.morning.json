@@ -1,0 +1,468 @@
+{
+  "mode": "scenario",
+  "now": "2026-09-22T05:40:00.000Z",
+  "range": {
+    "start": "2026-09-22T04:30:00.000Z",
+    "end": "2026-09-22T12:30:00.000Z",
+    "default": "2026-09-22T08:25:00.000Z"
+  },
+  "degraded": false,
+  "missingFeeds": [],
+  "feeds": [
+    {
+      "id": "weather",
+      "name": "Weather",
+      "cadenceMin": 15,
+      "enabled": true,
+      "status": "live",
+      "lastUpdated": "2026-09-22T05:30:00.000Z",
+      "simulated": true
+    },
+    {
+      "id": "traffic",
+      "name": "Traffic",
+      "cadenceMin": 5,
+      "enabled": true,
+      "status": "live",
+      "lastUpdated": "2026-09-22T05:40:00.000Z",
+      "simulated": true
+    },
+    {
+      "id": "incident",
+      "name": "Incidents",
+      "cadenceMin": null,
+      "enabled": true,
+      "status": "live",
+      "lastUpdated": "2026-09-22T05:00:00.000Z",
+      "simulated": true
+    }
+  ],
+  "pulse": {
+    "level": "attention",
+    "label": "ATTENTION",
+    "situationCount": 1,
+    "intensity": 0.17
+  },
+  "snapshot": {
+    "traffic": {
+      "level": "Elevated",
+      "avgCongestionPct": 33.1
+    },
+    "weather": {
+      "condition": "Clear",
+      "maxRainfallMmh": 0,
+      "avgTempC": 31
+    },
+    "incidents": {
+      "active": 2
+    }
+  },
+  "zones": [
+    {
+      "zoneId": "mi-road",
+      "name": "MI Road",
+      "lat": 26.9155,
+      "lng": 75.805,
+      "roads": [
+        "MI Road",
+        "Station Road"
+      ],
+      "weather": {
+        "rainfallMmh": 0,
+        "condition": "Clear",
+        "tempC": 30.8,
+        "severity": "normal",
+        "timestamp": "2026-09-22T05:30:00.000Z"
+      },
+      "traffic": {
+        "congestionPct": 38.5,
+        "baselinePct": 38,
+        "ratio": 1.01,
+        "avgSpeedKmh": 26.9,
+        "level": "Normal",
+        "severity": "normal",
+        "timestamp": "2026-09-22T05:40:00.000Z"
+      },
+      "incidents": {
+        "active": 0,
+        "items": []
+      },
+      "signals": [],
+      "signalCount": 0,
+      "severity": "normal",
+      "multiSource": false
+    },
+    {
+      "zoneId": "civil-lines",
+      "name": "Civil Lines",
+      "lat": 26.904,
+      "lng": 75.787,
+      "roads": [
+        "Bhawani Singh Road",
+        "Civil Lines Road"
+      ],
+      "weather": {
+        "rainfallMmh": 0,
+        "condition": "Clear",
+        "tempC": 31,
+        "severity": "normal",
+        "timestamp": "2026-09-22T05:30:00.000Z"
+      },
+      "traffic": {
+        "congestionPct": 29.4,
+        "baselinePct": 30,
+        "ratio": 0.98,
+        "avgSpeedKmh": 30,
+        "level": "Normal",
+        "severity": "normal",
+        "timestamp": "2026-09-22T05:40:00.000Z"
+      },
+      "incidents": {
+        "active": 0,
+        "items": []
+      },
+      "signals": [],
+      "signalCount": 0,
+      "severity": "normal",
+      "multiSource": false
+    },
+    {
+      "zoneId": "tonk-road",
+      "name": "Tonk Road",
+      "lat": 26.87,
+      "lng": 75.796,
+      "roads": [
+        "Tonk Road",
+        "Gopalpura Bypass"
+      ],
+      "weather": {
+        "rainfallMmh": 0,
+        "condition": "Clear",
+        "tempC": 31.1,
+        "severity": "normal",
+        "timestamp": "2026-09-22T05:30:00.000Z"
+      },
+      "traffic": {
+        "congestionPct": 34,
+        "baselinePct": 34,
+        "ratio": 1,
+        "avgSpeedKmh": 28.4,
+        "level": "Normal",
+        "severity": "normal",
+        "timestamp": "2026-09-22T05:40:00.000Z"
+      },
+      "incidents": {
+        "active": 0,
+        "items": []
+      },
+      "signals": [],
+      "signalCount": 0,
+      "severity": "normal",
+      "multiSource": false
+    },
+    {
+      "zoneId": "malviya-nagar",
+      "name": "Malviya Nagar",
+      "lat": 26.855,
+      "lng": 75.811,
+      "roads": [
+        "JLN Marg",
+        "Malviya Nagar Main Road"
+      ],
+      "weather": {
+        "rainfallMmh": 0,
+        "condition": "Clear",
+        "tempC": 30.9,
+        "severity": "normal",
+        "timestamp": "2026-09-22T05:30:00.000Z"
+      },
+      "traffic": {
+        "congestionPct": 35.1,
+        "baselinePct": 32,
+        "ratio": 1.1,
+        "avgSpeedKmh": 28.1,
+        "level": "Normal",
+        "severity": "normal",
+        "timestamp": "2026-09-22T05:40:00.000Z"
+      },
+      "incidents": {
+        "active": 1,
+        "items": [
+          {
+            "id": "evt_00786",
+            "category": "construction",
+            "label": "Road resurfacing works",
+            "severity": "attention",
+            "lat": 26.857,
+            "lng": 75.80900000000001,
+            "timestamp": "2026-09-22T04:30:00.000Z"
+          }
+        ]
+      },
+      "signals": [
+        {
+          "key": "incident:evt_00786",
+          "type": "incident",
+          "source": "incident",
+          "category": "construction",
+          "label": "Road resurfacing works",
+          "severity": "attention",
+          "lat": 26.857,
+          "lng": 75.80900000000001,
+          "since": "2026-09-22T04:30:00.000Z"
+        }
+      ],
+      "signalCount": 1,
+      "severity": "attention",
+      "multiSource": false
+    },
+    {
+      "zoneId": "vaishali-nagar",
+      "name": "Vaishali Nagar",
+      "lat": 26.908,
+      "lng": 75.729,
+      "roads": [
+        "Ajmer Road",
+        "Vaishali Circle Road"
+      ],
+      "weather": {
+        "rainfallMmh": 0,
+        "condition": "Clear",
+        "tempC": 30.9,
+        "severity": "normal",
+        "timestamp": "2026-09-22T05:30:00.000Z"
+      },
+      "traffic": {
+        "congestionPct": 39.4,
+        "baselinePct": 28,
+        "ratio": 1.41,
+        "avgSpeedKmh": 26.6,
+        "level": "Elevated",
+        "severity": "attention",
+        "timestamp": "2026-09-22T05:40:00.000Z"
+      },
+      "incidents": {
+        "active": 1,
+        "items": [
+          {
+            "id": "evt_00781",
+            "category": "closure",
+            "label": "Road closure for water main repair",
+            "severity": "attention",
+            "lat": 26.911,
+            "lng": 75.731,
+            "timestamp": "2026-09-22T05:00:00.000Z"
+          }
+        ]
+      },
+      "signals": [
+        {
+          "key": "traffic",
+          "type": "traffic",
+          "source": "traffic",
+          "label": "Traffic at 39.4% vs 28% typical",
+          "severity": "attention",
+          "value": 39.4,
+          "unit": "%",
+          "baseline": 28,
+          "ratio": 1.41
+        },
+        {
+          "key": "incident:evt_00781",
+          "type": "incident",
+          "source": "incident",
+          "category": "closure",
+          "label": "Road closure for water main repair",
+          "severity": "attention",
+          "lat": 26.911,
+          "lng": 75.731,
+          "since": "2026-09-22T05:00:00.000Z"
+        }
+      ],
+      "signalCount": 2,
+      "severity": "attention",
+      "multiSource": true
+    },
+    {
+      "zoneId": "sanganer-airport",
+      "name": "Sanganer / Airport",
+      "lat": 26.8242,
+      "lng": 75.8122,
+      "roads": [
+        "Airport Road",
+        "Tonk Road"
+      ],
+      "weather": {
+        "rainfallMmh": 0,
+        "condition": "Clear",
+        "tempC": 31.1,
+        "severity": "normal",
+        "timestamp": "2026-09-22T05:30:00.000Z"
+      },
+      "traffic": {
+        "congestionPct": 21.9,
+        "baselinePct": 22,
+        "ratio": 1,
+        "avgSpeedKmh": 32.5,
+        "level": "Normal",
+        "severity": "normal",
+        "timestamp": "2026-09-22T05:40:00.000Z"
+      },
+      "incidents": {
+        "active": 0,
+        "items": []
+      },
+      "signals": [],
+      "signalCount": 0,
+      "severity": "normal",
+      "multiSource": false
+    }
+  ],
+  "situations": [
+    {
+      "id": "sit-vaishali-nagar-1790053800000",
+      "zoneId": "vaishali-nagar",
+      "location": "Vaishali Nagar",
+      "title": "Traffic disruption",
+      "severity": "attention",
+      "status": "active",
+      "detectedAt": "2026-09-22T05:10:00.000Z",
+      "resolvedAt": null,
+      "signals": [
+        {
+          "key": "traffic",
+          "type": "traffic",
+          "source": "traffic",
+          "label": "Traffic at 39.4% vs 28% typical",
+          "severity": "attention",
+          "value": 39.4,
+          "unit": "%",
+          "baseline": 28,
+          "ratio": 1.41
+        },
+        {
+          "key": "incident:evt_00781",
+          "type": "incident",
+          "source": "incident",
+          "category": "closure",
+          "label": "Road closure for water main repair",
+          "severity": "attention",
+          "lat": 26.911,
+          "lng": 75.731,
+          "since": "2026-09-22T05:00:00.000Z"
+        }
+      ],
+      "signalCount": 2,
+      "summary": "1 active incident report coincided with increased traffic around Vaishali Nagar.",
+      "correlation": {
+        "label": "POSSIBLE CORRELATION",
+        "text": "Incident reports and traffic changed within the same area and time window and may be related. No cause is confirmed.",
+        "lagMinutes": 0,
+        "chain": [
+          {
+            "type": "incident",
+            "label": "Incidents ↑",
+            "at": "2026-09-22T05:00:00.000Z"
+          },
+          {
+            "type": "traffic",
+            "label": "Traffic ↑",
+            "at": "2026-09-22T05:10:00.000Z"
+          }
+        ]
+      },
+      "timeline": [
+        {
+          "type": "incident",
+          "label": "Incidents ↑",
+          "at": "2026-09-22T05:00:00.000Z"
+        },
+        {
+          "type": "traffic",
+          "label": "Traffic ↑",
+          "at": "2026-09-22T05:10:00.000Z"
+        }
+      ],
+      "why": "Flagged because 2 signals from 2 different feeds changed in Vaishali Nagar within the same 30-minute window: Traffic at 39.4% vs 28% typical; Road closure for water main repair. Several signals moving together in one area is a pattern worth a look, not proof that one caused another."
+    }
+  ],
+  "anomalies": [
+    {
+      "zoneId": "malviya-nagar",
+      "name": "Malviya Nagar",
+      "severity": "attention",
+      "signals": [
+        {
+          "key": "incident:evt_00786",
+          "type": "incident",
+          "source": "incident",
+          "category": "construction",
+          "label": "Road resurfacing works",
+          "severity": "attention",
+          "lat": 26.857,
+          "lng": 75.80900000000001,
+          "since": "2026-09-22T04:30:00.000Z"
+        }
+      ],
+      "title": "Incident anomaly"
+    }
+  ],
+  "insights": {
+    "zoneCounts": {
+      "normal": 4,
+      "attention": 2,
+      "critical": 0
+    },
+    "activeSituations": 1,
+    "resolvedSituations": 0,
+    "patterns": []
+  },
+  "trends": [
+    {
+      "t": "2026-09-22T04:40:00.000Z",
+      "avgCongestionPct": 31.1,
+      "avgBaselinePct": 30.7,
+      "activeIncidents": 1,
+      "avgRainfallMmh": 0,
+      "situations": 0
+    },
+    {
+      "t": "2026-09-22T04:55:00.000Z",
+      "avgCongestionPct": 31,
+      "avgBaselinePct": 30.7,
+      "activeIncidents": 1,
+      "avgRainfallMmh": 0,
+      "situations": 0
+    },
+    {
+      "t": "2026-09-22T05:10:00.000Z",
+      "avgCongestionPct": 32.9,
+      "avgBaselinePct": 30.7,
+      "activeIncidents": 2,
+      "avgRainfallMmh": 0,
+      "situations": 1
+    },
+    {
+      "t": "2026-09-22T05:25:00.000Z",
+      "avgCongestionPct": 33,
+      "avgBaselinePct": 30.7,
+      "activeIncidents": 2,
+      "avgRainfallMmh": 0,
+      "situations": 1
+    },
+    {
+      "t": "2026-09-22T05:40:00.000Z",
+      "avgCongestionPct": 33.1,
+      "avgBaselinePct": 30.7,
+      "activeIncidents": 2,
+      "avgRainfallMmh": 0,
+      "situations": 1
+    }
+  ],
+  "summary": {
+    "level": "ATTENTION",
+    "headline": "1 situation detected",
+    "text": "Most significant: Traffic disruption at Vaishali Nagar (attention). 1 active incident report coincided with increased traffic around Vaishali Nagar.",
+    "generatedBy": "template"
+  }
+}
