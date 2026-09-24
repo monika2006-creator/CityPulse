@@ -1,13 +1,22 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { calculateRoutes } from "../utils/routeCalculations.js";
 import { correlateSignals } from "../utils/signalCorrelation.js";
+import {
+  getStoredSettings,
+  saveStoredSettings,
+  getStoredCity,
+  saveStoredCity,
+  getStoredNotifications,
+  saveStoredNotifications,
+} from "../services/notificationStore.js";
+import { detectSmartNotifications } from "../services/notificationEngine.js";
 
 const DataContext = createContext(null);
 const API = (import.meta.env.VITE_API_BASE_URL || "/api").replace(/\/$/, "");
 const clock = (value) => {
   if (!value) return "—";
   const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? "—" : date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+  return Number.isNaN(date.getTime()) ? "—" : date.toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit", hour12: false });
 };
 const signalId = (zone, signal) => `${zone.zoneId}:${signal.key === "rainfall" ? "weather" : signal.key === "traffic" ? "traffic" : signal.key.replace(/^incident:/, "")}`;
 
@@ -37,7 +46,7 @@ function adaptState(raw) {
       correlation: item.correlation,
     };
   });
-  return { ...raw, sourceState: raw, signals, situations, updatedAt: raw.now, mode: raw.mode || "scenario" };
+  return { ...raw, signals, situations, updatedAt: raw.now, refreshedAt: raw.snapshotAt, mode: raw.mode || "scenario" };
 }
 
 function adaptRoutes(raw) {
@@ -55,7 +64,7 @@ async function jsonRequest(path, init) {
   try {
     response = await fetch(`${API}${path}`, init);
   } catch {
-    throw new Error("Can't reach the CityPulse API. Start the backend on port 8787, or set VITE_API_BASE_URL to your deployed backend URL.");
+    throw new Error("Unable to update civic data. CityPulse backend is unavailable.");
   }
   if (!response.ok && response.status === 500 && API === "/api") {
     throw new Error("The frontend proxy cannot reach the backend at 127.0.0.1:8787. Start both services with `npm run dev:all` from the project root.");
@@ -66,21 +75,144 @@ async function jsonRequest(path, init) {
 
 export function CityPulseDataProvider({ children }) {
   const [snapshot, setSnapshot] = useState({ loading: true, error: "", state: null, routeResponse: null, health: null });
-  const replayMinute = useRef(235);
-  const refresh = useCallback(async () => {
-    const min = replayMinute.current;
-    replayMinute.current = min >= 475 ? 0 : min + 5;
-    setSnapshot((old) => ({ ...old, loading: true, error: "" }));
-    try {
-      const [stateRaw, routeResponse, health] = await Promise.all([
-        jsonRequest(`/state?min=${min}`), jsonRequest(`/routes?min=${min}`), jsonRequest("/health"),
-      ]);
-      setSnapshot({ loading: false, error: "", state: adaptState(stateRaw), routeResponse, health });
-    } catch (error) {
-      setSnapshot((old) => ({ ...old, loading: false, error: error.message || "CityPulse backend is unavailable." }));
-    }
+  const [settings, setSettings] = useState(getStoredSettings);
+  const [selectedCity, setSelectedCityState] = useState(getStoredCity);
+  const [notifications, setNotifications] = useState(getStoredNotifications);
+  const [scenarioMin, setScenarioMinState] = useState(235);
+  const scenarioMinRef = useRef(235);
+  const settingsRef = useRef(settings);
+  const notificationsRef = useRef(notifications);
+  useEffect(() => { settingsRef.current = settings; }, [settings]);
+  useEffect(() => { notificationsRef.current = notifications; }, [notifications]);
+
+  const previousSnapshotRef = useRef(null);
+  const isInitialLoadRef = useRef(true);
+  const hasLoadedRef = useRef(false);
+  const lastFetchedCityRef = useRef(null);
+
+  const updateSettings = useCallback((newSettings) => {
+    setSettings((prev) => {
+      const merged = typeof newSettings === "function" ? newSettings(prev) : { ...prev, ...newSettings };
+      saveStoredSettings(merged);
+      return merged;
+    });
   }, []);
-  useEffect(() => { void refresh(); }, [refresh]);
+
+  const setSelectedCity = useCallback((city) => {
+    setSelectedCityState(city);
+    saveStoredCity(city);
+  }, []);
+
+  const markAsRead = useCallback((notificationId) => {
+    setNotifications((prev) => {
+      const updated = prev.map((n) => (n.id === notificationId ? { ...n, isRead: true } : n));
+      saveStoredNotifications(updated);
+      return updated;
+    });
+  }, []);
+
+  const markAllAsRead = useCallback(() => {
+    setNotifications((prev) => {
+      const updated = prev.map((n) => ({ ...n, isRead: true }));
+      saveStoredNotifications(updated);
+      return updated;
+    });
+  }, []);
+
+  const clearNotificationHistory = useCallback(() => {
+    setNotifications([]);
+    saveStoredNotifications([]);
+  }, []);
+
+  const refresh = useCallback(async (customMin, advance = true) => {
+    setSnapshot((old) => ({ ...old, loading: !old.state, error: "" }));
+    try {
+      const sameCity = lastFetchedCityRef.current === selectedCity;
+      const activeMin = customMin !== undefined ? customMin : hasLoadedRef.current && sameCity && advance ? (scenarioMinRef.current >= 475 ? 0 : scenarioMinRef.current + 5) : scenarioMinRef.current;
+      scenarioMinRef.current = activeMin;
+      setScenarioMinState(activeMin);
+      const params = `?min=${activeMin}&city=${encodeURIComponent(selectedCity)}`;
+      const [stateRaw, routeResponse, health] = await Promise.all([
+        jsonRequest(`/state${params}`),
+        jsonRequest(`/routes${params}`),
+        jsonRequest("/health"),
+      ]);
+
+      const adaptedStateData = adaptState(stateRaw);
+      const adaptedRoutesData = adaptRoutes(routeResponse ?? {});
+
+      const currentSnapshot = {
+        state: adaptedStateData,
+        routes: adaptedRoutesData,
+        routeResponse,
+        health,
+        city: selectedCity,
+      };
+
+      // Smart Notification Engine check
+      if (previousSnapshotRef.current && !isInitialLoadRef.current) {
+        const detected = detectSmartNotifications(
+          previousSnapshotRef.current,
+          currentSnapshot,
+          settingsRef.current,
+          notificationsRef.current,
+          selectedCity
+        );
+
+        if (detected.length > 0) {
+          setNotifications((prev) => {
+            const combined = [...detected, ...prev];
+            saveStoredNotifications(combined);
+            return combined;
+          });
+        }
+      }
+
+      previousSnapshotRef.current = currentSnapshot;
+      lastFetchedCityRef.current = selectedCity;
+      isInitialLoadRef.current = false;
+      hasLoadedRef.current = true;
+
+      setSnapshot({
+        loading: false,
+        error: "",
+        state: adaptedStateData,
+        routeResponse,
+        health,
+      });
+    } catch (error) {
+      setSnapshot((old) => ({
+        ...old,
+        loading: false,
+        error: error.message || "Unable to update civic data.",
+      }));
+    }
+  }, [selectedCity]);
+
+  // Initial fetch
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
+  // Periodic polling (every 30 seconds)
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (document.visibilityState === "visible") {
+        void refresh(undefined, false);
+      }
+    }, 30000);
+    return () => clearInterval(timer);
+  }, [refresh]);
+
+  const setScenarioMin = useCallback((min) => {
+    scenarioMinRef.current = min;
+    setScenarioMinState(min);
+    void refresh(min, false);
+  }, [refresh]);
+
+  const unreadCount = useMemo(() => {
+    return notifications.filter((n) => !n.isRead).length;
+  }, [notifications]);
 
   const value = useMemo(() => {
     const state = snapshot.state;
@@ -93,16 +225,50 @@ export function CityPulseDataProvider({ children }) {
       return counts;
     }, { low: 0, medium: 0, high: 0, critical: 0 });
     const pulse = state?.pulse?.level === "critical" ? "CRITICAL" : state?.pulse?.level === "attention" ? "ATTENTION" : state ? "NORMAL" : "—";
+
     return {
-      ...snapshot, state, routes, signals: state?.signals ?? [], situations, correlations,
+      ...snapshot,
+      state,
+      routes,
+      signals: state?.signals ?? [],
+      situations,
+      correlations,
       activeSignals: (state?.signals ?? []).filter((s) => s.status === "active"),
       recentSignals: [...(state?.signals ?? [])].sort((a, b) => (b.timestamp || "").localeCompare(a.timestamp || "")).slice(0, 8),
-      activeSituations: situations.filter((s) => s.status === "active"), severityCounts, pulse,
+      activeSituations: situations.filter((s) => s.status === "active"),
+      severityCounts,
+      pulse,
       summary: state?.summary,
       dataMode: state?.mode === "scenario" ? "SIMULATED SCENARIO" : String(state?.mode || "UNAVAILABLE").toUpperCase(),
       refresh,
+      // Settings & Notifications
+      settings,
+      updateSettings,
+      selectedCity,
+      setSelectedCity,
+      notifications,
+      unreadCount,
+      markAsRead,
+      markAllAsRead,
+      clearNotificationHistory,
+      scenarioMin,
+      setScenarioMin,
     };
-  }, [snapshot, refresh]);
+  }, [
+    snapshot,
+    refresh,
+    settings,
+    updateSettings,
+    selectedCity,
+    setSelectedCity,
+    notifications,
+    unreadCount,
+    markAsRead,
+    markAllAsRead,
+    clearNotificationHistory,
+    scenarioMin,
+    setScenarioMin,
+  ]);
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
 }

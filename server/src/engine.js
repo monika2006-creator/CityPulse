@@ -1,5 +1,5 @@
 // Rule-based detection on a rolling window. No ML. Pure functions: (events, time) -> state.
-import { ZONES } from './zones.js';
+import { CITY_ZONES } from './zones.js';
 import { RULES, worstOf, conditionOf, round1, round2 } from './normalize.js';
 
 const MIN = 60000, STEP = 5 * MIN, LOOKBACK = 6 * 60 * MIN, MERGE_GAP = 15 * MIN;
@@ -9,11 +9,11 @@ const TYPE_ORDER = ['rainfall', 'traffic', 'incident'];
 const mean = (a) => (a.length ? round1(a.reduce((x, y) => x + y, 0) / a.length) : null);
 const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
 
-export function buildIndex(events) {
+export function buildIndex(events, zones = CITY_ZONES.jaipur) {
   const idx = {};
-  for (const z of ZONES) idx[z.id] = { weather: [], traffic: [], incident: [] };
+  for (const z of zones) idx[z.id] = { weather: [], traffic: [], incident: [] };
   for (const e of events) idx[e.zoneId][e.source].push({ ...e, t: Date.parse(e.timestamp) });
-  return { byZone: idx, all: events };
+  return { byZone: idx, all: events, zones };
 }
 const latest = (arr, t, maxAge) => { for (let i = arr.length - 1; i >= 0; i--) if (arr[i].t <= t) return t - arr[i].t <= maxAge ? arr[i] : null; return null; };
 
@@ -27,7 +27,7 @@ function zoneState(idx, z, t, off) {
   if (c && c.severity !== 'normal') signals.push({ key: 'traffic', type: 'traffic', source: 'traffic', label: `Traffic at ${c.value}% vs ${c.baseline}% typical`, severity: c.severity, value: c.value, unit: '%', baseline: c.baseline, ratio: round2(c.value / c.baseline) });
   for (const e of inc) if (e.severity !== 'normal') signals.push({ key: `incident:${e.id}`, type: 'incident', source: 'incident', category: e.category, label: e.label, severity: e.severity, lat: e.lat, lng: e.lng, since: e.timestamp });
   return {
-    zoneId: z.id, name: z.name, lat: z.lat, lng: z.lng, roads: z.roads,
+    zoneId: z.id, name: z.name, lat: z.lat, lng: z.lng, roads: z.roads, address: z.address ?? null, baseline: z.baseline,
     weather: w ? { rainfallMmh: w.value, condition: conditionOf(w.value), tempC: w.extra?.tempC ?? null, severity: w.severity, timestamp: w.timestamp } : null,
     traffic: c ? { congestionPct: c.value, baselinePct: c.baseline, ratio: round2(c.value / c.baseline), avgSpeedKmh: c.extra?.avgSpeedKmh ?? null, level: LEVEL[c.severity], severity: c.severity, timestamp: c.timestamp } : null,
     incidents: { active: inc.length, items: inc.map((e) => ({ id: e.id, category: e.category, label: e.label, severity: e.severity, lat: e.lat, lng: e.lng, timestamp: e.timestamp })) },
@@ -40,7 +40,7 @@ function zoneState(idx, z, t, off) {
 function scan(idx, tEnd, off, t0) {
   const start = Math.max(t0, tEnd - LOOKBACK), ts = [];
   for (let t = tEnd; t >= start; t -= STEP) ts.push(t);
-  return ts.reverse().map((t) => ({ t, zones: ZONES.map((z) => zoneState(idx, z, t, off)) }));
+  return ts.reverse().map((t) => ({ t, zones: idx.zones.map((z) => zoneState(idx, z, t, off)) }));
 }
 
 function episodesFor(steps, zi) { // contiguous multi-source runs; gaps <= 15 min are merged (no flicker)
@@ -94,10 +94,11 @@ function toSituation(ep, steps, zi, tEnd) {
 }
 
 export function computeState(idx, tEnd, { off = new Set(), meta } = {}) {
-  const steps = scan(idx, tEnd, off, meta.start);
+  const steps = scan(idx, tEnd, off, meta?.start ?? 0);
+  if (!steps.length) return { now: new Date(tEnd).toISOString(), zones: [], situations: [], pulse: { level: 'Normal', situationCount: 0 } };
   const cur = steps.at(-1).zones;
   const situations = [];
-  ZONES.forEach((_, zi) => episodesFor(steps, zi).forEach((ep) => situations.push(toSituation(ep, steps, zi, tEnd))));
+  idx.zones.forEach((_, zi) => episodesFor(steps, zi).forEach((ep) => situations.push(toSituation(ep, steps, zi, tEnd))));
   const sevRankN = { critical: 2, attention: 1, normal: 0 };
   situations.sort((a, b) => (a.status === b.status ? 0 : a.status === 'active' ? -1 : 1) || sevRankN[b.severity] - sevRankN[a.severity] || b.detectedAt.localeCompare(a.detectedAt));
   const active = situations.filter((s) => s.status === 'active');
@@ -130,7 +131,7 @@ export function computeState(idx, tEnd, { off = new Set(), meta } = {}) {
     situations: s.zones.filter((z) => z.multiSource).length,
   }));
   return {
-    mode: 'scenario', now: new Date(tEnd).toISOString(),
+    mode: 'scenario', city: idx.zones[0]?.id.split('-')[0] ?? 'jaipur', snapshotAt: new Date().toISOString(), now: new Date(tEnd).toISOString(),
     range: { start: new Date(meta.start).toISOString(), end: new Date(meta.start + meta.rangeMin * MIN).toISOString(), default: new Date(meta.start + meta.defaultMin * MIN).toISOString() },
     degraded: missing.length > 0, missingFeeds: missing, feeds,
     pulse: { level: worst, label: worst.toUpperCase(), situationCount: active.length, intensity: Math.min(1, round2(sitW / 3)) },

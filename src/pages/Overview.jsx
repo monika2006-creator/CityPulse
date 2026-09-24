@@ -3,7 +3,7 @@ import { Activity, AlertTriangle, MapPin, Radio, RefreshCw, Route as RouteIcon, 
 import MapView from "../components/MapView.jsx";
 import MapLegend from "../components/MapLegend.jsx";
 import SeverityBadge from "../components/SeverityBadge.jsx";
-import { useCityPulseData } from "../context/CityPulseDataContext.jsx";
+import { useCityPulseData, clock } from "../context/CityPulseDataContext.jsx";
 
 const pulseTone = {
   NORMAL: "text-normal-ink bg-normal/10",
@@ -75,13 +75,16 @@ function BriefPanel({ state, routeResponse }) {
           </ul>
         </div>
       </div>
-      <p className="mt-3 border-t border-border pt-2 text-[9px] text-muted">SIMULATED SCENARIO · Replay time {new Date(state.updatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+      <p className="mt-3 border-t border-border pt-2 text-[9px] text-muted flex items-center justify-between">
+        <span>SIMULATED SCENARIO · Scenario Time: <strong className="font-mono text-ink">{clock(state.updatedAt)} IST</strong></span>
+        <span>Refreshed: <strong className="font-mono text-ink">{clock(state.refreshedAt)} IST</strong></span>
+      </p>
     </aside>
   );
 }
 
 export default function Overview() {
-  const { loading, error, state, health, activeSignals, activeSituations, pulse, routes, routeResponse, dataMode, refresh } = useCityPulseData();
+  const { loading, error, state, health, activeSignals, activeSituations, pulse, routes, routeResponse, dataMode, refresh, selectedCity } = useCityPulseData();
   const [selectedSignal, setSelectedSignal] = useState(null);
   const monitoredAreas = new Set((state?.zones ?? []).map((zone) => zone.zoneId)).size;
   const rankedSituations = useMemo(() => [...activeSituations].sort((a, b) => (b.timestamp || "").localeCompare(a.timestamp || "")), [activeSituations]);
@@ -95,7 +98,12 @@ export default function Overview() {
   return (
     <div className="space-y-3.5">
       <div className="flex flex-wrap items-center justify-end gap-3">
-        <p className="mr-auto text-[10px] text-muted">Replay time: <span className="font-mono text-ink">{new Date(state.updatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span> · refresh advances the scenario 5 minutes</p>
+        <p className="mr-auto text-[10px] text-muted flex flex-wrap items-center gap-1.5">
+          <span>Scenario Time: <strong className="font-mono text-ink">{clock(state.updatedAt)} IST</strong></span>
+          <span className="text-border">·</span>
+          <span>Last Refreshed: <strong className="font-mono text-ink">{clock(state.refreshedAt)} IST</strong></span>
+          <span className="text-muted hidden sm:inline">(Advances +5m per refresh)</span>
+        </p>
         <div className="flex flex-wrap items-center gap-2">
           <span className={`rounded-full px-2.5 py-1 text-[9px] font-bold tracking-wider ${pulseTone[pulse] ?? "text-muted bg-elevated"}`}><span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-current" />{pulse}</span>
           <span className="rounded-full border border-border bg-surface px-2.5 py-1 text-[9px] font-bold tracking-wider text-muted">{dataMode}</span>
@@ -109,14 +117,14 @@ export default function Overview() {
         <Metric icon={Activity} label="Civic Pulse" value={pulse} detail={`${state.pulse?.situationCount ?? activeSituations.length} active situation${(state.pulse?.situationCount ?? activeSituations.length) === 1 ? "" : "s"}`} tone={pulse === "CRITICAL" ? "critical" : pulse === "ATTENTION" ? "violet" : "normal"} />
         <Metric icon={AlertTriangle} label="Active Situations" value={String(activeSituations.length).padStart(2, "0")} detail={`${severityCounts.critical ?? 0} critical · ${severityCounts.high ?? 0} high · ${severityCounts.medium ?? 0} medium · ${severityCounts.low ?? 0} low`} tone="critical" />
         <Metric icon={Radio} label="Signals" value={String(activeSignals.length).padStart(2, "0")} detail="Across traffic, weather, incidents" />
-        <Metric icon={MapPin} label="Monitored Areas" value={String(monitoredAreas).padStart(2, "0")} detail="Configured Jaipur zones" tone="violet" />
+        <Metric icon={MapPin} label="Monitored Areas" value={String(monitoredAreas).padStart(2, "0")} detail={`Configured ${selectedCity} zones`} tone="violet" />
       </div>
 
       <div className="overview-feature-grid">
         <section className="min-w-0 rounded-xl border border-border bg-surface p-2.5 shadow-card">
-          <div className="flex items-center justify-between px-1 pb-2"><PanelTitle>Jaipur signal map</PanelTitle><span className="text-[9px] font-bold tracking-wider text-muted">{activeSignals.length} SIGNALS · {dataMode}</span></div>
+          <div className="flex items-center justify-between px-1 pb-2"><PanelTitle>{selectedCity} signal map</PanelTitle><span className="text-[9px] font-bold tracking-wider text-muted">{activeSignals.length} SIGNALS · {dataMode}</span></div>
           <div className="h-[300px] overflow-hidden rounded-lg border border-border bg-sidebar sm:h-[350px]">
-            <MapView signals={activeSignals} selectedId={selectedId} onSelect={setSelectedSignal} onDeselect={(id) => setSelectedSignal((current) => current === id ? null : current)} />
+            <MapView signals={activeSignals} selectedId={selectedId} city={selectedCity} onSelect={setSelectedSignal} onDeselect={(id) => setSelectedSignal((current) => current === id ? null : current)} />
           </div>
           <div className="flex flex-wrap items-center justify-between gap-2 px-2 pt-2"><MapLegend /><span className="text-[9px] text-muted">MAP © OPENSTREETMAP</span></div>
         </section>
@@ -145,7 +153,7 @@ export default function Overview() {
           <div className="space-y-2">
             {feeds.map((feed) => <div key={feed.id} className="flex items-center justify-between gap-2 rounded-lg border border-border bg-inset px-2.5 py-2"><div className="min-w-0"><p className="truncate text-[11px] font-semibold capitalize text-ink">{feed.name ?? feed.id}</p><p className="text-[9px] text-muted">{feed.cadenceMin ? `Scenario cadence ${feed.cadenceMin} min` : "Scenario incident data"}</p></div><span className={`rounded px-1.5 py-0.5 text-[8px] font-bold ${feed.enabled ? "bg-attention/10 text-attention-ink" : "bg-elevated text-muted"}`}>{feed.enabled ? "SIMULATED" : "OFF"}</span></div>)}
           </div>
-          <p className="mt-2 text-[9px] text-muted">Last scenario timestamp: {new Date(state.updatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} · refresh advances 5 min.</p>
+          <p className="mt-2 text-[9px] text-muted">Scenario time: {clock(state.updatedAt)} IST · Refreshed: {clock(state.refreshedAt)} IST</p>
         </section>
       </div>
       {error && <p role="status" className="text-xs text-attention-ink">Refresh failed: {error}</p>}

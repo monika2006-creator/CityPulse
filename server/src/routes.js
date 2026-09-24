@@ -1,35 +1,53 @@
 // Route intelligence. NOTHING here is a hardcoded result: ETAs, delays, signal counts and the
 // fastest route are all computed from state (scenario) or from TomTom responses (live).
-import { zoneById } from './zones.js';
 import { speedAt } from './normalize.js';
 
 // ---- scenario journey: geography only (which zones a corridor crosses, and how long each stretch is) ----
 export const SCENARIO_JOURNEY = { from: { name: 'MI Road', zoneId: 'mi-road' }, to: { name: 'Jaipur Airport', zoneId: 'sanganer-airport' } };
-const CORRIDORS = [
-  { id: 'route-1', name: 'Tonk Road corridor',       legs: [['mi-road', 3.0], ['tonk-road', 6.0], ['sanganer-airport', 4.0]] },
-  { id: 'route-2', name: 'Malviya Nagar corridor',   legs: [['mi-road', 3.0], ['malviya-nagar', 6.5], ['sanganer-airport', 3.5]] },
-  { id: 'route-3', name: 'Civil Lines bypass',       legs: [['civil-lines', 5.0], ['malviya-nagar', 3.0], ['sanganer-airport', 5.0]] },
-];
+
+const CITY_CORRIDORS = {
+  jaipur: [
+    { id: 'route-1', name: 'Tonk Road corridor', indexes: [0, 2, 5], lengths: [3.2, 5.5, 4.1] },
+    { id: 'route-2', name: 'Malviya Nagar corridor', indexes: [0, 3, 5], lengths: [3.2, 6.2, 3.8] },
+    { id: 'route-3', name: 'Civil Lines bypass', indexes: [1, 3, 5], lengths: [4.8, 3.2, 4.9] },
+  ],
+  jodhpur: [
+    { id: 'route-1', name: 'Paota & Ratanada corridor', indexes: [0, 2, 5], lengths: [3.0, 5.2, 4.0] },
+    { id: 'route-2', name: 'Sardarpura corridor', indexes: [0, 1, 5], lengths: [2.8, 4.8, 4.2] },
+    { id: 'route-3', name: 'Shastri Nagar bypass', indexes: [0, 4, 5], lengths: [3.5, 3.8, 3.9] },
+  ],
+  udaipur: [
+    { id: 'route-1', name: 'Chetak Circle corridor', indexes: [0, 2, 5], lengths: [2.9, 4.5, 3.8] },
+    { id: 'route-2', name: 'Fatehpura corridor', indexes: [0, 1, 5], lengths: [3.2, 5.0, 3.6] },
+    { id: 'route-3', name: 'Sukhadia Circle bypass', indexes: [0, 4, 5], lengths: [3.6, 3.4, 4.0] },
+  ],
+};
+
 const r1 = (n) => Math.round(n * 10) / 10;
 
 // same id scheme as the frontend adapter, so route signals and map markers are the SAME objects
 export const signalId = (zoneId, s) => (s.type === 'incident' ? `${zoneId}:${s.key.split(':')[1]}` : `${zoneId}:${s.type === 'rainfall' ? 'weather' : 'traffic'}`);
 
 export function scenarioRoutes(state) {
+  const cityKey = (state?.city?.id || 'jaipur').toLowerCase();
+  const corridors = CITY_CORRIDORS[cityKey] ?? CITY_CORRIDORS.jaipur;
   const zones = Object.fromEntries(state.zones.map((z) => [z.zoneId, z]));
-  const from = zoneById[SCENARIO_JOURNEY.from.zoneId], to = zoneById[SCENARIO_JOURNEY.to.zoneId];
-  const routes = CORRIDORS.map((c) => {
+  const list = state.zones;
+  const from = list[0];
+  const to = list[5] ?? list.at(-1);
+  const routes = corridors.map((c) => {
     let curH = 0, normH = 0, km = 0; const signals = [], path = [[from.lat, from.lng]];
-    for (const [zid, len] of c.legs) {
-      const z = zones[zid], vN = speedAt(zoneById[zid].baseline.congestion), vC = z.traffic ? z.traffic.avgSpeedKmh : vN; // feed off -> assume normal, flagged below
+    const legs = c.indexes.map((index, i) => [list[index] ?? list[0], c.lengths[i]]);
+    for (const [zone, len] of legs) {
+      const zid = zone.zoneId, z = zones[zid] ?? zone, vN = speedAt(z.baseline?.congestion ?? 30), vC = z.traffic ? z.traffic.avgSpeedKmh : vN;
       curH += len / vC; normH += len / vN; km += len; path.push([z.lat, z.lng]);
-      for (const s of z.signals) signals.push({ id: signalId(zid, s), type: s.type === 'rainfall' ? 'weather' : s.type === 'incident' ? 'road_incident' : 'traffic', label: s.label, severity: s.severity, zoneId: zid });
+      for (const s of z.signals ?? []) signals.push({ id: signalId(zid, s), type: s.type === 'rainfall' ? 'weather' : s.type === 'incident' ? 'road_incident' : 'traffic', label: s.label, severity: s.severity, zoneId: zid });
     }
     path.push([to.lat, to.lng]);
     return { id: c.id, name: c.name, source: 'scenario', distanceKm: r1(km), normalSec: Math.round(normH * 3600), currentSec: Math.round(curH * 3600), signals, path, trafficSignals: null };
   });
   const missing = state.missingFeeds ?? [];
-  return finalize(routes, { journey: { from: { name: SCENARIO_JOURNEY.from.name, lat: from.lat, lng: from.lng }, to: { name: SCENARIO_JOURNEY.to.name, lat: to.lat, lng: to.lng } }, source: 'scenario', now: state.now, degraded: missing.length > 0, missingFeeds: missing });
+  return finalize(routes, { journey: { from: { name: from.name, lat: from.lat, lng: from.lng }, to: { name: to.name, lat: to.lat, lng: to.lng } }, source: 'scenario', now: state.now, degraded: missing.length > 0, missingFeeds: missing });
 }
 
 // ---- shared: rounding, delay, fastest ----
@@ -112,10 +130,55 @@ export function liveResult(routes, journey) {
 }
 const downsample = (a, n) => (a.length <= n ? a : a.filter((_, i) => i % Math.ceil(a.length / n) === 0 || i === a.length - 1));
 
-// ---- geocoding (TomTom Search), biased to Jaipur ----
-export async function geocode(q, key, fetchImpl = fetch) {
-  const qs = new URLSearchParams({ key, limit: '5', countrySet: 'IN', lat: '26.9124', lon: '75.7873', radius: '60000', typeahead: 'true', language: 'en-GB' });
+// ---- geocoding (TomTom Search), biased to selected city center ----
+export async function geocode(q, key, fetchImpl = fetch, center = [26.9124, 75.7873]) {
+  const qs = new URLSearchParams({ key, limit: '10', countrySet: 'IN', lat: String(center[0]), lon: String(center[1]), radius: '60000', typeahead: 'true', language: 'en-GB' });
   const res = await fetchImpl(`https://api.tomtom.com/search/2/search/${encodeURIComponent(q)}.json?${qs}`, { signal: AbortSignal.timeout(5000) });
   if (!res.ok) throw new Error(`TomTom search ${res.status}`);
-  return ((await res.json()).results ?? []).map((x) => ({ id: x.id, name: x.poi?.name ?? x.address?.freeformAddress ?? q, address: x.address?.freeformAddress ?? '', lat: x.position.lat, lng: x.position.lon }));
+  const rawResults = ((await res.json()).results ?? []).map((x) => ({
+    id: x.id,
+    name: x.poi?.name ?? x.address?.freeformAddress ?? q,
+    address: x.address?.freeformAddress ?? '',
+    lat: x.position.lat,
+    lng: x.position.lon,
+  }));
+
+  const qLower = q.toLowerCase();
+  const list = [];
+
+  // Special handling for Amity locations to verify coordinates and avoid duplicates
+  if (qLower.includes('amity')) {
+    // Add verified Amity University Rajasthan
+    list.push({
+      id: 'amity-university-rajasthan',
+      name: 'Amity University Rajasthan',
+      address: 'SP-1 Kant Kalwar, NH11C, RIICO Industrial Area, Rajasthan 303002',
+      lat: 27.1764,
+      lng: 75.9568,
+    });
+    // Keep a distinct city office only when the geocoder returns its real position.
+    const rawHouse = rawResults.find((r) => r.name.toLowerCase().includes('amity house') || r.address.toLowerCase().includes('lal kothi'));
+    if (rawHouse) list.push({ ...rawHouse, name: 'Amity House' });
+  }
+
+  // Deduplicate and append other valid results
+  const seenAddresses = new Set(list.map((item) => item.address.toLowerCase().trim()));
+  const seenNames = new Set(list.map((item) => item.name.toLowerCase().trim()));
+
+  for (const item of rawResults) {
+    const normAddr = item.address.toLowerCase().trim();
+    const normName = item.name.toLowerCase().trim();
+    // Skip duplicate Amity entries (like duplicate Amity University at Amber or Lal Kothi) if already covered
+    if (qLower.includes('amity') && normName.includes('university')) {
+      continue;
+    }
+    if (seenAddresses.has(normAddr) || (normName && seenNames.has(normName))) {
+      continue;
+    }
+    seenAddresses.add(normAddr);
+    if (normName) seenNames.add(normName);
+    list.push(item);
+  }
+
+  return list.slice(0, 6);
 }

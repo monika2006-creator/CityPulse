@@ -2,8 +2,20 @@
 // This file holds map settings and labels only — NO signal data.
 // Signals always come from signals.js.
 
-// Jaipur city centre. Deliberately fixed: CityPulse never uses the visitor's location.
+// City centers for multi-city support
 export const JAIPUR_CENTER = [26.885, 75.79];
+export const CITY_CENTERS = {
+  jaipur: [26.885, 75.79],
+  jodhpur: [26.2389, 73.0243],
+  udaipur: [24.5854, 73.7125],
+};
+
+export const getCityCenter = (city) => {
+  if (!city) return JAIPUR_CENTER;
+  const key = String(city).toLowerCase().trim();
+  return CITY_CENTERS[key] || JAIPUR_CENTER;
+};
+
 export const DEFAULT_ZOOM = 12;
 export const MIN_ZOOM = 10;
 export const MAX_ZOOM = 18;

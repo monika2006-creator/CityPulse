@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import { Search, X, ArrowRight } from "lucide-react";
+import { useCityPulseData } from "../context/CityPulseDataContext.jsx";
 
 export default function SearchBar({
   placeholder = "Search an area, landmark, or situation…",
   className = "",
   onPlaceSelect,
 }) {
+  const { selectedCity } = useCityPulseData();
   const [value, setValue] = useState("");
   const [focused, setFocused] = useState(false);
   const [results, setResults] = useState([]);
@@ -30,7 +32,7 @@ export default function SearchBar({
     setSearching(true);
     setSearchError("");
     try {
-      const response = await fetch(`/api/geocode?q=${encodeURIComponent(query)}`, { signal: AbortSignal.timeout(8000) });
+      const response = await fetch(`/api/geocode?q=${encodeURIComponent(query)}&city=${encodeURIComponent(selectedCity)}`, { signal: AbortSignal.timeout(8000) });
       if (!response.ok) throw new Error("Place search unavailable");
       const data = await response.json();
       const place = data.results?.[0];
@@ -49,7 +51,7 @@ export default function SearchBar({
     const timer = setTimeout(async () => {
       setSearching(true);
       try {
-        const response = await fetch(`/api/geocode?q=${encodeURIComponent(value.trim())}`, { signal: AbortSignal.timeout(8000) });
+        const response = await fetch(`/api/geocode?q=${encodeURIComponent(value.trim())}&city=${encodeURIComponent(selectedCity)}`, { signal: AbortSignal.timeout(8000) });
         if (!response.ok) throw new Error("Place search unavailable");
         const data = await response.json();
         if (!cancelled) { setResults(data.results ?? []); setResultsFor(value.trim()); setSearchError(data.warnings?.[0] ?? ""); }
@@ -58,7 +60,7 @@ export default function SearchBar({
       } finally { if (!cancelled) setSearching(false); }
     }, 350);
     return () => { cancelled = true; clearTimeout(timer); };
-  }, [value]);
+  }, [value, selectedCity]);
 
   const clear = () => {
     setValue("");

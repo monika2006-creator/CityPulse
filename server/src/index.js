@@ -3,17 +3,27 @@ import express from 'express';
 import { GEMINI_API_KEY, TOMTOM_KEY } from './env.js';
 import cors from 'cors';
 import { generate, META } from './sim.js';
+import { CITIES as CITY_CONFIGS } from './zones.js';
 import { buildIndex, computeState } from './engine.js';
 import { buildSummary } from './summary.js';
 import { scenarioRoutes, tomtomRoutes, attachTrafficSignals, liveResult, geocode } from './routes.js';
 
-const idx = buildIndex(generate());
 const off = new Set(); // feeds switched off via the demo kill-switch
 const MIN = 60000;
 
-export function stateAt(tMs) {
-  const t = Math.min(Math.max(tMs, META.start), META.start + META.rangeMin * MIN);
-  const s = computeState(idx, t, { off, meta: META });
+const validCity = (value) => CITY_CONFIGS[String(value ?? 'jaipur').toLowerCase()] ?? CITY_CONFIGS.jaipur;
+const cityIndex = new Map();
+function indexFor(city) {
+  if (!cityIndex.has(city.id)) cityIndex.set(city.id, buildIndex(generate(city.id, city.zones), city.zones));
+  return cityIndex.get(city.id);
+}
+
+export function stateAt(tMs, cityId = 'jaipur') {
+  const city = validCity(cityId);
+  const safeT = Number.isFinite(tMs) ? tMs : META.start + META.defaultMin * MIN;
+  const t = Math.min(Math.max(safeT, META.start), META.start + META.rangeMin * MIN);
+  const s = computeState(indexFor(city), t, { off, meta: META });
+  s.city = { id: city.id, name: city.name, center: city.center };
   s.summary = buildSummary(s);
   return s;
 }
@@ -23,13 +33,13 @@ app.use(cors());
 app.use(express.json());
 
 app.get('/', (_req, res) => res.json({ name: 'CityPulse API', status: 'running', endpoints: ['/api/health', '/api/state', '/api/feeds'] }));
-app.get('/api/health', (_req, res) => res.json({ ok: true, mode: 'scenario', tomtomKey: !!TOMTOM_KEY(), tomtomCallsToday: calls.n }));
+app.get('/api/health', (_req, res) => res.json({ ok: true, mode: 'scenario', tomtomKey: !!TOMTOM_KEY(), tomtomCallsToday: calls.n, cities: Object.values(CITY_CONFIGS).map(({ id, name }) => ({ id, name })) }));
 
 // GET /api/state?mode=scenario&min=235   (min = minutes since scenario start; or t=<ISO>)
 app.get('/api/state', (req, res) => {
-  const { min, t, mode } = req.query;
+  const { min, t, mode, city } = req.query;
   const tMs = t ? Date.parse(t) : META.start + (min !== undefined ? Number(min) : META.defaultMin) * MIN;
-  const state = stateAt(Number.isFinite(tMs) ? tMs : META.start + META.defaultMin * MIN);
+  const state = stateAt(Number.isFinite(tMs) ? tMs : META.start + META.defaultMin * MIN, city);
   if (mode === 'live') state.warnings = ['Live mode is not available yet; serving scenario data.'];
   res.json(state);
 });
@@ -115,9 +125,9 @@ const parsePt = (s) => { const [lat, lng] = String(s ?? '').split(',').map(Numbe
 // GET /api/routes                          -> scenario routes computed from the current state
 // GET /api/routes?mode=live&from=lat,lng&to=lat,lng  -> TomTom live routes (falls back to scenario with a warning)
 app.get('/api/routes', async (req, res) => {
-  const { mode, from, to, min } = req.query;
+  const { mode, from, to, min, city } = req.query;
   const tMs = META.start + (min !== undefined ? Number(min) : META.defaultMin) * MIN;
-  const scenario = () => scenarioRoutes(stateAt(Number.isFinite(tMs) ? tMs : META.start + META.defaultMin * MIN));
+  const scenario = () => scenarioRoutes(stateAt(Number.isFinite(tMs) ? tMs : META.start + META.defaultMin * MIN, city));
   if (mode !== 'live') {
     const out = scenario();
     if (from || to) out.warnings = ['Scenario mode only supports the demo journey.'];
@@ -140,10 +150,10 @@ app.get('/api/routes', async (req, res) => {
 
 // GET /api/geocode?q=jaipur airport   (cached 10 min; needs >= 3 chars)
 app.get('/api/geocode', async (req, res) => {
-  const q = String(req.query.q ?? '').trim(), key = TOMTOM_KEY();
+  const q = String(req.query.q ?? '').trim(), key = TOMTOM_KEY(), city = validCity(req.query.city);
   if (q.length < 3) return res.json({ results: [] });
   if (!key) return res.json({ results: [], warnings: ['no TomTom key'] });
-  try { res.json({ results: await cached(`g:${q.toLowerCase()}`, 600_000, () => geocode(q, key)) }); }
+  try { res.json({ results: await cached(`g:${city.id}:${q.toLowerCase()}`, 600_000, () => geocode(q, key, undefined, city.center)) }); }
   catch (e) { res.json({ results: [], warnings: [e.message] }); }
 });
 
@@ -154,7 +164,7 @@ app.post('/api/feeds/:id', (req, res) => { // body: { "enabled": false }
   res.json({ id: req.params.id, enabled: !off.has(req.params.id) });
 });
 
-if (process.argv[1].endsWith('index.js')) {
+if (process.argv[1]?.endsWith('index.js')) {
   const port = process.env.PORT || 8787;
   app.listen(port, () => console.log(`CityPulse server on http://localhost:${port}`));
 }

@@ -36,7 +36,7 @@ export default function LiveMap({ searchedPlace }) {
   const [focus, setFocus] = useState(null);
   const isOverlayLayout = useMediaQuery("(min-width: 1280px)");
 
-  const { activeSignals, dataMode, loading, state, error } = useCityPulseData();
+  const { activeSignals, dataMode, loading, state, error, selectedCity } = useCityPulseData();
   if (loading && !state) return <p className="rounded-xl border border-border bg-surface p-6 text-sm text-muted" role="status">Loading map signals…</p>;
   if (!state) return <p className="rounded-xl border border-border bg-surface p-6 text-sm text-muted">Backend data unavailable: {error}</p>;
 
@@ -90,7 +90,7 @@ export default function LiveMap({ searchedPlace }) {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-xl font-bold uppercase tracking-tight text-ink">Live City Map</h2>
-          <p className="mt-1 text-sm text-muted">Monitor simulated civic signals across Jaipur.</p>
+          <p className="mt-1 text-sm text-muted">Monitor simulated civic signals across {selectedCity}.</p>
         </div>
         <div className="flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1.5 text-xs text-muted">
           <span className="h-1.5 w-1.5 rounded-full bg-muted" />
@@ -137,6 +137,7 @@ export default function LiveMap({ searchedPlace }) {
             searchedPlace={searchedPlace}
             selectedId={visibleSelectedId}
             focus={focus}
+            city={selectedCity}
             onSelect={setSelectedId}
             onDeselect={handleDeselect}
             rightInset={isOverlayLayout ? PANEL_INSET : 0}

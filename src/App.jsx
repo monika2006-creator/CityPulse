@@ -5,6 +5,7 @@ import LiveMap from "./pages/LiveMap.jsx";
 import RouteIntelligence from "./pages/RouteIntelligence.jsx";
 import Situations from "./pages/Situations.jsx";
 import Insights from "./pages/Insights.jsx";
+import Settings from "./pages/Settings.jsx";
 import { CityPulseDataProvider } from "./context/CityPulseDataContext.jsx";
 
 const PAGES = {
@@ -13,21 +14,18 @@ const PAGES = {
   "route-intelligence": RouteIntelligence,
   situations: Situations,
   insights: Insights,
+  settings: Settings,
 };
 
 export default function App() {
   const [page, setPage] = useState("overview");
   const [searchedPlace, setSearchedPlace] = useState(null);
   const CurrentPage = PAGES[page] ?? Overview;
-  const handlePlaceSelect = (place) => {
-    setSearchedPlace({ ...place, requestId: Date.now() });
-    setPage("live-map");
-  };
 
   return (
     <CityPulseDataProvider>
-      <Layout currentPage={page} setCurrentPage={setPage} onPlaceSelect={handlePlaceSelect}>
-        <CurrentPage searchedPlace={searchedPlace} />
+      <Layout currentPage={page} setCurrentPage={setPage} onNavigate={setPage} onPlaceSelect={setSearchedPlace}>
+        {page === "live-map" ? <LiveMap searchedPlace={searchedPlace} /> : <CurrentPage />}
       </Layout>
     </CityPulseDataProvider>
   );

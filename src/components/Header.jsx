@@ -3,8 +3,8 @@ import SearchBar from "./SearchBar.jsx";
 import ThemeToggle from "./ThemeToggle.jsx";
 import { useCityPulseData } from "../context/CityPulseDataContext.jsx";
 
-export default function Header({ title, description, onMenuClick, onPlaceSelect }) {
-  const { state, dataMode, loading } = useCityPulseData();
+export default function Header({ title, description, onMenuClick, onPlaceSelect, onOpenNotifications, onOpenSettings }) {
+  const { state, dataMode, loading, selectedCity, unreadCount } = useCityPulseData();
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-bg/90 backdrop-blur supports-[backdrop-filter]:bg-bg/75">
       <div className="flex items-center justify-between gap-4 px-5 pt-5 sm:px-8">
@@ -36,19 +36,23 @@ export default function Header({ title, description, onMenuClick, onPlaceSelect 
           </div>
           <div className="hidden items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium text-muted md:flex">
             <MapPin size={13} className="text-violet" />
-            Jaipur
+            {selectedCity}
           </div>
           <ThemeToggle />
           <button
             type="button"
+            data-notification-trigger
+            onClick={onOpenNotifications}
             className="relative rounded-lg border border-border bg-surface p-2 text-muted transition-all duration-200 hover:border-cyan/40 hover:text-ink"
             aria-label="Notifications"
+            aria-haspopup="dialog"
           >
             <Bell size={17} />
-            <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-critical" />
+            {unreadCount > 0 && <span className="absolute -right-1 -top-1 min-w-4 rounded-full bg-critical px-1 text-center font-mono text-[9px] font-bold text-white">{unreadCount}</span>}
           </button>
           <button
             type="button"
+            onClick={onOpenSettings}
             className="rounded-lg border border-border bg-surface p-2 text-muted transition-all duration-200 hover:border-cyan/40 hover:text-ink"
             aria-label="Settings"
           >

@@ -41,8 +41,8 @@ export function makeEvent(o) {
     feed: o.feed,                           // sim | open-meteo | tomtom
     category: o.category,                   // rainfall | congestion | accident | closure | construction | obstruction
     zoneId: o.zoneId,
-    lat: o.lat ?? z.lat,
-    lng: o.lng ?? z.lng,
+    lat: o.lat ?? z?.lat ?? 26.9124,
+    lng: o.lng ?? z?.lng ?? 75.7873,
     timestamp: new Date(o.ts).toISOString(), // always UTC ISO
     value: round1(o.value),
     unit: o.unit,

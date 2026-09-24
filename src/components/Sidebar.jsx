@@ -62,9 +62,16 @@ function NavButton({ item, isActive, onSelect }) {
   );
 }
 
-export default function Sidebar({ currentPage, setCurrentPage, isOpen, onClose }) {
-  const { activeSituations, dataMode, state } = useCityPulseData();
+export default function Sidebar({
+  currentPage,
+  setCurrentPage,
+  isOpen,
+  onClose,
+  onOpenNotifications,
+}) {
+  const { activeSituations, dataMode, state, selectedCity, unreadCount } = useCityPulseData();
   const situationBadge = activeSituations.length ? String(activeSituations.length).padStart(2, "0") : undefined;
+
   const handleSelect = (id) => {
     setCurrentPage(id);
     onClose?.();
@@ -138,7 +145,7 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, onClose }
             <div className="mt-2.5 flex items-center gap-1.5 border-t border-border pt-2.5">
               <MapPin size={13} className="text-violet shrink-0" />
               <div className="leading-tight">
-                <p className="text-xs font-medium text-ink">Jaipur</p>
+                <p className="text-xs font-medium text-ink">{selectedCity}</p>
                 <p className="text-[10.5px] text-muted">{dataMode}</p>
               </div>
             </div>
@@ -147,16 +154,32 @@ export default function Sidebar({ currentPage, setCurrentPage, isOpen, onClose }
           <div className="space-y-1">
             <button
               type="button"
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted transition-all duration-200 hover:bg-ink/[0.04] hover:text-ink"
+              onClick={() => {
+                onOpenNotifications?.();
+                onClose?.();
+              }}
+              className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium text-muted transition-all duration-200 hover:bg-ink/[0.04] hover:text-ink"
             >
-              <Bell size={16} />
-              <span>Notifications</span>
+              <div className="flex items-center gap-3">
+                <Bell size={16} />
+                <span>Notifications</span>
+              </div>
+              {unreadCount > 0 && (
+                <span className="rounded-full bg-cyan/15 px-1.5 py-0.5 font-mono text-[10px] font-bold text-cyan-ink">
+                  {unreadCount}
+                </span>
+              )}
             </button>
             <button
               type="button"
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted transition-all duration-200 hover:bg-ink/[0.04] hover:text-ink"
+              onClick={() => handleSelect("settings")}
+              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200 ${
+                currentPage === "settings"
+                  ? "bg-cyan/10 text-ink shadow-active font-semibold"
+                  : "text-muted hover:bg-ink/[0.04] hover:text-ink"
+              }`}
             >
-              <Settings size={16} />
+              <Settings size={16} className={currentPage === "settings" ? "text-cyan-ink" : ""} />
               <span>Settings</span>
             </button>
           </div>

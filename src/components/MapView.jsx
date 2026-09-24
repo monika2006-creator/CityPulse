@@ -1,11 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import L from "leaflet";
 import { MapContainer, TileLayer, AttributionControl, CircleMarker, Tooltip, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "./MapView.css";
 import SignalMarker from "./SignalMarker.jsx";
 import {
-  JAIPUR_CENTER,
+  getCityCenter,
   DEFAULT_ZOOM,
   MIN_ZOOM,
   MAX_ZOOM,
@@ -112,33 +112,40 @@ function CloseOnEscape() {
   return null;
 }
 
+function CityCenterController({ city, signals, rightInset }) {
+  const map = useMap();
+  const prevCityRef = useRef(city);
+
+  useEffect(() => {
+    if (!city) return;
+    if (prevCityRef.current !== city) {
+      prevCityRef.current = city;
+      map.setView(getCityCenter(city), DEFAULT_ZOOM);
+    }
+  }, [city, signals, map, rightInset]);
+
+  return null;
+}
+
 /**
- * Interactive Jaipur map. Renders whatever `signals` it is given — it owns no signal data.
+ * Interactive civic map. Renders whatever `signals` it is given — it owns no signal data.
  *
  * Props
  *  - signals:      array from signals.js (already filtered by the page)
  *  - selectedId:   id of the currently selected signal, or null
  *  - focus:        { id } request to fly to a signal (new object per request)
+ *  - city:         active city name (Jaipur, Jodhpur, Udaipur)
  *  - onSelect(id): marker clicked
  *  - onDeselect(id): popup closed
  *  - rightInset:   px on the right covered by an overlay, so popups pan clear of it
  */
-export default function MapView({ signals, selectedId, focus, searchedPlace, onSelect, onDeselect, rightInset = 0 }) {
+export default function MapView({ signals, selectedId, focus, searchedPlace, city = "Jaipur", onSelect, onDeselect, rightInset = 0 }) {
   const offsets = getMarkerOffsets(signals);
 
-  // Opening view: frame every signal (they are all in Jaipur), keeping clear of the
-  // floating panel. MapContainer only reads this on first render, so later filtering
-  // never moves the map. With no signals, fall back to the fixed Jaipur centre.
-  const initialView = signals.length
-    ? {
-        bounds: L.latLngBounds(signals.map((signal) => [signal.latitude, signal.longitude])),
-        boundsOptions: {
-          paddingTopLeft: [32, 32],
-          paddingBottomRight: [32 + rightInset, 32],
-          maxZoom: 13,
-        },
-      }
-    : { center: JAIPUR_CENTER, zoom: DEFAULT_ZOOM };
+  // Opening view: frame every signal in the selected city, keeping clear of the
+  // floating panel. MapContainer only reads this on first render.
+  const cityCenter = getCityCenter(city);
+  const initialView = { center: cityCenter, zoom: DEFAULT_ZOOM };
 
   const popupPadding = {
     topLeft: [24, 24],
@@ -149,7 +156,7 @@ export default function MapView({ signals, selectedId, focus, searchedPlace, onS
     <div
       className="citypulse-map relative h-full w-full"
       role="region"
-      aria-label="Interactive map of simulated civic signals across Jaipur"
+      aria-label={`Interactive map of simulated civic signals across ${city}`}
     >
       <MapContainer
         {...initialView}
@@ -182,6 +189,7 @@ export default function MapView({ signals, selectedId, focus, searchedPlace, onS
           </CircleMarker>
         )}
 
+        <CityCenterController city={city} signals={signals} rightInset={rightInset} />
         <FocusController focus={focus} signals={signals} rightInset={rightInset} />
         <PlaceFocusController place={searchedPlace} />
         <CloseOnEscape />

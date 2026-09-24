@@ -25,7 +25,7 @@ function savedJourneyValue(key) {
 }
 
 export default function RouteIntelligence() {
-  const { loading, state, error, routeResponse, routes: scenarioRoutes, signals: stateSignals, situations, correlations, dataMode } = useCityPulseData();
+  const { loading, state, error, routeResponse, routes: scenarioRoutes, signals: stateSignals, situations, correlations, dataMode, selectedCity } = useCityPulseData();
   const [fromInput, setFromInput] = useState(savedJourneyValue("from"));
   const [toInput, setToInput] = useState(savedJourneyValue("to"));
   const [routeResult, setRouteResult] = useState(null);
@@ -34,9 +34,23 @@ export default function RouteIntelligence() {
   const [selectedRouteId, setSelectedRouteId] = useState(null);
   const detailRef = useRef(null);
   const routeInputsInitialized = useRef(false);
+  const prevCityRef = useRef(selectedCity);
   const isTwoColumn = useMediaQuery("(min-width: 1280px)");
 
   useEffect(() => {
+    if (prevCityRef.current !== selectedCity && routeResponse?.journey) {
+      prevCityRef.current = selectedCity;
+      const from = routeResponse.journey.from?.name || "";
+      const to = routeResponse.journey.to?.name || "";
+      setFromInput(from);
+      setToInput(to);
+      setRouteResult(null);
+      try {
+        localStorage.setItem("citypulse.route.from", from);
+        localStorage.setItem("citypulse.route.to", to);
+      } catch { /* Optional persistence */ }
+      return;
+    }
     if (routeInputsInitialized.current || !routeResponse?.journey) return;
     const from = fromInput || routeResponse.journey.from?.name || "";
     const to = toInput || routeResponse.journey.to?.name || "";
@@ -47,7 +61,7 @@ export default function RouteIntelligence() {
       localStorage.setItem("citypulse.route.to", to);
     } catch { /* The form still works when browser storage is unavailable. */ }
     routeInputsInitialized.current = true;
-  }, [routeResponse]);
+  }, [routeResponse, selectedCity]);
 
   const updateFrom = (value) => {
     setFromInput(value);
@@ -87,7 +101,7 @@ export default function RouteIntelligence() {
     setRequesting(true);
     try {
       const geocode = async (query) => {
-        const response = await fetch(`/api/geocode?q=${encodeURIComponent(query)}`, { signal: AbortSignal.timeout(9000) });
+        const response = await fetch(`/api/geocode?q=${encodeURIComponent(query)}&city=${encodeURIComponent(selectedCity)}`, { signal: AbortSignal.timeout(9000) });
         if (!response.ok) throw new Error("Place search failed.");
         return response.json();
       };
@@ -98,7 +112,7 @@ export default function RouteIntelligence() {
         setNotice([...(fromData.warnings ?? []), ...(toData.warnings ?? []), "Could not geocode both places. Showing the backend's simulated scenario routes."].join(" "));
         return;
       }
-      const params = new URLSearchParams({ mode: "live", from: `${from.lat},${from.lng}`, to: `${to.lat},${to.lng}`, fromName: from.name, toName: to.name });
+      const params = new URLSearchParams({ mode: "live", from: `${from.lat},${from.lng}`, to: `${to.lat},${to.lng}`, fromName: from.name, toName: to.name, city: selectedCity });
       const response = await fetch(`/api/routes?${params}`, { signal: AbortSignal.timeout(16000) });
       if (!response.ok) throw new Error("Live route request failed.");
       const result = await response.json();
