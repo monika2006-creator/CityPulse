@@ -1,0 +1,222 @@
+/* Live Civic Map — CityPulse styling for Leaflet.
+   Every rule is scoped to .citypulse-map so Leaflet is untouched elsewhere.
+   Imported after leaflet/dist/leaflet.css so these rules win. */
+
+.citypulse-map .leaflet-container {
+  background: #0b1120;
+  font-family: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  outline-offset: -2px;
+}
+
+/* OpenStreetMap tiles → dark. Only the tile pane is filtered; markers and popups are not. */
+.citypulse-map .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.92) saturate(0.55);
+}
+
+.citypulse-map .cp-map-vignette {
+  box-shadow: inset 0 0 70px 6px rgba(7, 11, 20, 0.65);
+}
+
+/* ---------- Zoom controls ---------- */
+.citypulse-map .leaflet-control-zoom.leaflet-bar {
+  border: 1px solid #1e293b;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px -6px rgba(0, 0, 0, 0.7);
+}
+
+.citypulse-map .leaflet-bar a,
+.citypulse-map .leaflet-bar a:hover {
+  width: 32px;
+  height: 32px;
+  line-height: 31px;
+  background-color: #0f172a;
+  border-bottom: 1px solid #1e293b;
+  color: #f8fafc;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.citypulse-map .leaflet-bar a:last-child {
+  border-bottom: 0;
+}
+
+.citypulse-map .leaflet-bar a:hover {
+  background-color: #141e33;
+  color: #22d3ee;
+}
+
+.citypulse-map .leaflet-bar a.leaflet-disabled {
+  background-color: #0f172a;
+  color: #94a3b8;
+  opacity: 0.45;
+  cursor: default;
+}
+
+.citypulse-map .leaflet-bar a:focus-visible {
+  outline: 2px solid #22d3ee;
+  outline-offset: -2px;
+}
+
+.citypulse-map .leaflet-top.leaflet-left {
+  top: 4px;
+  left: 4px;
+}
+
+/* ---------- Attribution (kept visible: required by OpenStreetMap) ---------- */
+.citypulse-map .leaflet-control-attribution {
+  background: rgba(11, 17, 32, 0.85);
+  color: #94a3b8;
+  font-size: 10px;
+  line-height: 1.6;
+  padding: 1px 8px;
+  border-top-left-radius: 8px;
+}
+
+.citypulse-map .leaflet-control-attribution a {
+  color: #94a3b8;
+  text-decoration: none;
+}
+
+.citypulse-map .leaflet-control-attribution a:hover {
+  color: #22d3ee;
+  text-decoration: underline;
+}
+
+/* ---------- Markers ---------- */
+.citypulse-map .cp-marker-icon {
+  background: transparent;
+  border: 0;
+}
+
+.citypulse-map .cp-marker-icon:focus {
+  outline: none;
+}
+
+.cp-marker {
+  position: relative;
+  display: block;
+  width: 30px;
+  height: 30px;
+  color: var(--cp-color);
+}
+
+.cp-marker__body {
+  position: absolute;
+  inset: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: #0f172a;
+  border: 1.5px solid var(--cp-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.55);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.cp-marker--critical .cp-marker__body {
+  box-shadow: 0 0 10px -1px rgba(251, 113, 133, 0.55), 0 2px 8px rgba(0, 0, 0, 0.55);
+}
+
+.cp-marker__pulse {
+  position: absolute;
+  inset: 1px;
+  border-radius: 9999px;
+  border: 1.5px solid var(--cp-color);
+  opacity: 0;
+  animation: cp-pulse 2.4s ease-out infinite;
+}
+
+@keyframes cp-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+
+.citypulse-map .cp-marker-icon:hover .cp-marker__body {
+  transform: scale(1.1);
+}
+
+/* Selected + keyboard focus: cyan ring (the live-data accent) */
+.citypulse-map .cp-marker-icon.is-selected .cp-marker__body,
+.citypulse-map .cp-marker-icon:focus-visible .cp-marker__body {
+  box-shadow: 0 0 0 2px #070b14, 0 0 0 4px #22d3ee, 0 2px 8px rgba(0, 0, 0, 0.55);
+  transform: scale(1.08);
+}
+
+.cp-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Popup ---------- */
+.citypulse-map .cp-popup .leaflet-popup-content-wrapper {
+  padding: 0;
+  background: #0f172a;
+  color: #f8fafc;
+  border: 1px solid #1e293b;
+  border-radius: 16px;
+  box-shadow: 0 18px 44px -14px rgba(0, 0, 0, 0.85);
+}
+
+.citypulse-map .cp-popup .leaflet-popup-content {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Leaflet gives popup <p> a 1.3em margin that would beat Tailwind margin utilities.
+   Reset it here; popup spacing uses padding/gap instead. */
+.citypulse-map .cp-popup .leaflet-popup-content p {
+  margin: 0;
+}
+
+.citypulse-map .cp-popup .leaflet-popup-tip {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  box-shadow: none;
+}
+
+.citypulse-map .cp-popup a.leaflet-popup-close-button {
+  top: 10px;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: 6px;
+  font: 400 18px/22px "Manrope", sans-serif;
+  text-align: center;
+  color: #94a3b8;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.citypulse-map .cp-popup a.leaflet-popup-close-button:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #f8fafc;
+}
+
+.citypulse-map .cp-popup a.leaflet-popup-close-button:focus-visible {
+  outline: 2px solid #22d3ee;
+  outline-offset: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cp-marker__pulse {
+    animation: none;
+  }
+  .cp-marker__body {
+    transition: none;
+  }
+}
