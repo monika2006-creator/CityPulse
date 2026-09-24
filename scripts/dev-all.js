@@ -67,7 +67,10 @@ const main = async () => {
   if (apiIsCurrent) console.log(`Reusing CityPulse API at http://127.0.0.1:${port}.`);
   else start("CityPulse API", process.execPath, ["src/index.js"], path.join(root, "server"), { ...process.env, PORT: String(port) });
   const webEnv = { ...process.env, CITYPULSE_API_PORT: String(port) };
-  start("CityPulse frontend", process.execPath, [path.join(root, "node_modules/vite/bin/vite.js")], root, webEnv);
+  const viteArgs = [path.join(root, "node_modules/vite/bin/vite.js")];
+  if (process.env.HOST) viteArgs.push("--host", process.env.HOST);
+  if (process.env.WEB_PORT) viteArgs.push("--port", process.env.WEB_PORT);
+  start("CityPulse frontend", process.execPath, viteArgs, root, webEnv);
 };
 
 main().catch((error) => {
