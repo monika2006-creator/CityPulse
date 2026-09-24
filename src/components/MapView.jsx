@@ -204,12 +204,24 @@ export default function MapView({ signals, selectedId, focus, searchedPlace, sea
           <CircleMarker ref={searchedMarkerRef} center={[Number(searchedPlace.lat), Number(searchedPlace.lng)]} radius={9}
             pathOptions={{ color: "#ffffff", weight: 3, fillColor: "#0891b2", fillOpacity: 1 }}>
             <Tooltip permanent direction="top" offset={[0, -8]}>{searchedPlace.name}</Tooltip>
-            <Popup><div className="min-w-40"><p className="font-semibold text-ink">{searchedPlace.name}</p>{searchedPlaceWeather ? <p className="mt-1 text-sm text-muted">Temperature <strong className="font-mono text-ink">{Number(searchedPlaceWeather.temperatureC).toFixed(1)}°C</strong></p> : <p className="mt-1 text-xs text-muted">{searchedPlaceWeatherError || "Loading local weather…"}</p>}{searchedPlaceWeather && <p className="text-[10px] text-muted">Current · Open-Meteo</p>}</div></Popup>
+            <Popup className="cp-popup" minWidth={220} maxWidth={280}>
+              <div className="min-w-40 p-3 pr-7">
+                <p className="font-semibold text-ink">{searchedPlace.name}</p>
+                {searchedPlaceWeather ? (
+                  <p className="mt-1 text-sm text-muted">
+                    Temperature <strong className="font-mono text-ink">{Number(searchedPlaceWeather.temperatureC).toFixed(1)}°C</strong>
+                  </p>
+                ) : (
+                  <p className="mt-1 text-xs text-muted">{searchedPlaceWeatherError || "Loading local weather…"}</p>
+                )}
+                {searchedPlaceWeather && <p className="mt-1 text-[10px] text-muted">Current · Open-Meteo</p>}
+              </div>
+            </Popup>
           </CircleMarker>
         )}
 
         {routePath?.length > 1 && <Polyline positions={routePath} pathOptions={{ color: "#0891b2", weight: 5, opacity: 0.9 }} />}
-        {amenities.map((place) => <Marker key={place.id} position={[place.lat, place.lng]} icon={amenityIcon(place.type)}><Popup><strong>{place.name || (place.type === "ev_charger" ? "EV charger" : "Petrol station")}</strong><p className="text-xs text-muted">{place.type === "ev_charger" ? "EV charging" : "Fuel / petrol"}{place.operator ? ` · ${place.operator}` : ""}</p></Popup></Marker>)}
+        {amenities.map((place) => <Marker key={place.id} position={[place.lat, place.lng]} icon={amenityIcon(place.type)}><Popup className="cp-popup"><div className="p-3 pr-7"><strong className="text-ink">{place.name || (place.type === "ev_charger" ? "EV charger" : "Petrol station")}</strong><p className="mt-1 text-xs text-muted">{place.type === "ev_charger" ? "EV charging" : "Fuel / petrol"}{place.operator ? ` · ${place.operator}` : ""}</p></div></Popup></Marker>)}
 
         <CityCenterController city={city} signals={signals} rightInset={rightInset} />
         <RouteFitController path={routePath} />
