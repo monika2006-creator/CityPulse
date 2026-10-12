@@ -4,7 +4,7 @@ import { TYPE_ICON, SEVERITY_STYLES } from "./SignalRow.jsx";
 import { SEVERITY_MARKER } from "../data/mapConfig.js";
 
 function formatReading(value, unit) {
-  if (value === undefined || value === null) return "—";
+  if (value === undefined || value === null) return "N/A";
   if (!unit) return String(value);
   return unit === "%" ? `${value}%` : `${value} ${unit}`;
 }
@@ -31,7 +31,7 @@ export default function SignalPopup({ signal }) {
         {signal.title}
       </h3>
       <p className="flex items-center gap-1.5 pt-1 text-xs text-muted">
-        <MapPin size={12} className="shrink-0 text-violet" />
+        <MapPin size={12} className="shrink-0 text-muted" />
         <span className="truncate">{signal.area}</span>
       </p>
 

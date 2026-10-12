@@ -99,7 +99,11 @@ export default function Layout({ currentPage, setCurrentPage, onPlaceSelect, onN
         </div>
         <footer className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-border px-5 py-4 text-xs text-muted sm:px-8">
           <span>© {new Date().getFullYear()} CityPulse</span>
-          <a href="https://github.com/monika2006-creator/CityPulse" target="_blank" rel="noopener noreferrer" className="rounded text-muted underline-offset-4 hover:text-ink hover:underline">Project on GitHub</a>
+          <nav aria-label="Legal and project links" className="flex flex-wrap gap-x-4 gap-y-2">
+            <a href="/privacy.html" className="rounded text-muted underline-offset-4 hover:text-ink hover:underline">Privacy</a>
+            <a href="/terms.html" className="rounded text-muted underline-offset-4 hover:text-ink hover:underline">Terms</a>
+            <a href="https://github.com/monika2006-creator/CityPulse" target="_blank" rel="noopener noreferrer" className="rounded text-muted underline-offset-4 hover:text-ink hover:underline">GitHub project</a>
+          </nav>
         </footer>
       </main>
     </div>

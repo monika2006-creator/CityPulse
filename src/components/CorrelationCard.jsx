@@ -87,7 +87,7 @@ export default function CorrelationCard({ correlation, signals, routes, situatio
             {linkedSituations.map((situation) => (
               <li key={situation.id}>
                 <span className="font-semibold text-ink">{situation.title}</span>
-                {situation.impact ? ` — ${situation.impact.charAt(0).toLowerCase()}${situation.impact.slice(1)}.` : "."}
+                {situation.impact ? `: ${situation.impact.charAt(0).toLowerCase()}${situation.impact.slice(1)}.` : "."}
               </li>
             ))}
           </ul>

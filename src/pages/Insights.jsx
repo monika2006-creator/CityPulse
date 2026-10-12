@@ -39,7 +39,7 @@ export default function Insights() {
             Where observed signals overlap in place and time. Relationships show overlap, not cause.
           </p>
         </div>
-        <div className="flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1.5 text-xs text-muted">
+        <div className="flex items-center gap-2 rounded-md border border-border bg-surface px-3 py-1.5 text-xs text-muted">
           <span className="h-1.5 w-1.5 rounded-full bg-muted" />
           <span className="font-semibold tracking-wide">{dataMode}</span>
         </div>

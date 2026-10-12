@@ -30,7 +30,7 @@ function NavButton({ item, isActive, onSelect }) {
       className={`group relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
         isActive
           ? "bg-cyan/10 text-ink shadow-active"
-          : "text-muted hover:translate-x-0.5 hover:bg-ink/[0.04] hover:text-ink"
+          : "text-muted hover:bg-ink/[0.04] hover:text-ink"
       }`}
     >
       {isActive && (
@@ -137,13 +137,12 @@ export default function Sidebar({
             </p>
             <div className="mt-1.5 flex items-center gap-1.5">
               <span className="relative flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-normal opacity-60" />
                 <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-normal" />
               </span>
               <span className="text-xs font-semibold text-ink">{state ? "Backend connected" : "Connecting…"}</span>
             </div>
             <div className="mt-2.5 flex items-center gap-1.5 border-t border-border pt-2.5">
-              <MapPin size={13} className="text-violet shrink-0" />
+              <MapPin size={13} className="text-muted shrink-0" />
               <div className="leading-tight">
                 <p className="text-xs font-medium text-ink">{selectedCity}</p>
                 <p className="text-[10.5px] text-muted">{dataMode}</p>

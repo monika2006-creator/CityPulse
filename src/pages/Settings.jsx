@@ -11,7 +11,6 @@ import {
   Activity,
   CheckCircle2,
   AlertCircle,
-  Sparkles,
   RefreshCw,
   Trash2,
   Info,
@@ -227,10 +226,7 @@ export default function Settings() {
         </div>
 
         <p className="mt-3 text-[11px] text-muted">
-          💡 <span className="font-semibold text-ink">Judge Demo Flow:</span> Click{" "}
-          <strong className="text-cyan-ink">Baseline Conditions (min 150)</strong> first, then click{" "}
-          <strong className="text-critical">Peak Disruption (min 235)</strong>. The notification bell will light up with real
-          delay, alternative route, and situation alerts!
+          Choose a checkpoint to view its simulated conditions and related alerts.
         </p>
       </section>
 
@@ -597,7 +593,7 @@ export default function Settings() {
           </h3>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           <div className="rounded-lg border border-border bg-elevated p-3">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-muted">Backend API</p>
             <div className="mt-1 flex items-center gap-1.5">
@@ -606,7 +602,7 @@ export default function Settings() {
                 {isBackendOk ? "Operational" : "Offline"}
               </span>
             </div>
-            <p className="mt-1 font-mono text-[10px] text-muted">Port 8787</p>
+            <p className="mt-1 font-mono text-[10px] text-muted">Health check</p>
           </div>
 
           <div className="rounded-lg border border-border bg-elevated p-3">
@@ -614,7 +610,7 @@ export default function Settings() {
             <div className="mt-1 flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-normal" />
               <span className="text-xs font-bold text-ink">
-                {isTomTomConfigured ? "TomTom Live" : "Scenario"}
+                {isTomTomConfigured ? "TomTom" : "Scenario"}
               </span>
             </div>
             <p className="mt-1 font-mono text-[10px] text-muted">
@@ -630,22 +626,22 @@ export default function Settings() {
                 {isCivicDataConnected ? "Connected" : "Reconnecting"}
               </span>
             </div>
-            <p className="mt-1 font-mono text-[10px] text-muted">6 Monitored Zones</p>
+            <p className="mt-1 font-mono text-[10px] text-muted">{state?.zones?.length ?? 0} monitored zones</p>
           </div>
 
           <div className="rounded-lg border border-border bg-elevated p-3">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted">AI Explanation</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted">Snapshot summary</p>
             <div className="mt-1 flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-cyan" />
-              <span className="text-xs font-bold text-ink">Available</span>
+              <span className={`h-2 w-2 rounded-full ${state?.summary ? "bg-normal" : "bg-muted"}`} />
+              <span className="text-xs font-bold text-ink">{state?.summary ? "Available" : "No snapshot"}</span>
             </div>
-            <p className="mt-1 font-mono text-[10px] text-muted">Deterministic Fallback</p>
+            <p className="mt-1 font-mono text-[10px] text-muted">{state?.summary ? "Current data" : "Waiting for data"}</p>
           </div>
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3">
           <div className="text-xs text-muted">
-            <span className="font-semibold text-ink">CityPulse</span> v1.2.0 • Civic Intelligence Platform
+            <span className="font-semibold text-ink">CityPulse</span> · Hackathon demo
           </div>
           <button
             type="button"

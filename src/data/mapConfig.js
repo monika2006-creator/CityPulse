@@ -1,5 +1,5 @@
 // Presentation config for the Live Civic Map.
-// This file holds map settings and labels only — NO signal data.
+// This file holds map settings and labels only. It contains no signal data.
 // Signals always come from signals.js.
 
 // City centers for multi-city support

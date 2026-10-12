@@ -67,7 +67,7 @@ const Shell = ({ label, children }) => (
 );
 
 // Explanation: which routes were compared and why this one is lowest. Uses only the
-// calculated route objects — nothing here is hardcoded.
+// calculated route objects: nothing here is hardcoded.
 function buildExplanation(lowest, routes, isLive) {
   const others = routes
     .filter((route) => route.currentTravelTime !== null && !lowest.routes.some((low) => low.id === route.id))
@@ -84,7 +84,7 @@ function buildExplanation(lowest, routes, isLive) {
     : `${base} It is the only route with a valid current ETA.`;
 }
 
-// The route(s) with the lowest CURRENT simulated ETA. Based on currentTravelTime only —
+// The route(s) with the lowest CURRENT simulated ETA. Based on currentTravelTime only N/A
 // a comparison of demo data, not a recommendation of real-world navigation.
 export default function LowestEtaCard({ lowest, routes, signals, situations, selectedId, onSelect }) {
   const isLive = routes[0]?.source === "tomtom";
@@ -105,7 +105,7 @@ export default function LowestEtaCard({ lowest, routes, signals, situations, sel
     <Shell label={`Route with the lowest ${isLive ? "live" : "simulated"} current ETA`}>
       <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-bold tracking-[0.14em] text-cyan-ink">
         <span className="h-1.5 w-1.5 rounded-full bg-cyan" aria-hidden="true" />
-        CURRENT LOWEST ETA{lowest.isTie && " — TIE"}
+        CURRENT LOWEST ETA{lowest.isTie && " (TIE)"}
       </p>
 
       <div className="mt-3 flex flex-wrap items-end gap-x-6 gap-y-2">

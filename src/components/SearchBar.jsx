@@ -3,7 +3,6 @@ import { Search, X, ArrowRight } from "lucide-react";
 import { useCityPulseData } from "../context/CityPulseDataContext.jsx";
 
 export default function SearchBar({
-  placeholder = "Search an area, landmark, or situation…",
   className = "",
   onPlaceSelect,
 }) {
@@ -108,8 +107,7 @@ export default function SearchBar({
         onChange={(e) => setValue(e.target.value)}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
-        placeholder={placeholder}
-        aria-label="Search CityPulse"
+        aria-label="Search a city area, landmark, or situation"
         className={`w-full rounded-lg border bg-surface py-2.5 pl-10 pr-16 text-sm text-ink placeholder:text-muted outline-none transition-all duration-200 ${
           focused
             ? "border-cyan/50 shadow-focus"

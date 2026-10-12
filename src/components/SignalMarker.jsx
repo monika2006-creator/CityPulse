@@ -21,7 +21,6 @@ function buildIcon(signal, severityKey, [dx, dy]) {
   const marker = SEVERITY_MARKER[severityKey];
   const html = `
     <span class="cp-marker cp-marker--${severityKey}" style="--cp-color:${marker.color}">
-      ${severityKey === "critical" ? '<span class="cp-marker__pulse"></span>' : ""}
       <span class="cp-marker__body">
         <svg viewBox="0 0 14 14" width="14" height="14" fill="currentColor" aria-hidden="true" focusable="false">${marker.glyph}</svg>
       </span>

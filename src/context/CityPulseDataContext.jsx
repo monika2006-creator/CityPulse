@@ -14,9 +14,9 @@ import { detectSmartNotifications } from "../services/notificationEngine.js";
 const DataContext = createContext(null);
 const API = (import.meta.env.VITE_API_BASE_URL || "/api").replace(/\/$/, "");
 const clock = (value) => {
-  if (!value) return "—";
+  if (!value) return "Not available";
   const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? "—" : date.toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit", hour12: false });
+  return Number.isNaN(date.getTime()) ? "Not available" : date.toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit", hour12: false });
 };
 const signalId = (zone, signal) => `${zone.zoneId}:${signal.key === "rainfall" ? "weather" : signal.key === "traffic" ? "traffic" : signal.key.replace(/^incident:/, "")}`;
 
@@ -232,7 +232,7 @@ export function CityPulseDataProvider({ children }) {
       if (key in counts) counts[key] += 1;
       return counts;
     }, { low: 0, medium: 0, high: 0, critical: 0 });
-    const pulse = state?.pulse?.level === "critical" ? "CRITICAL" : state?.pulse?.level === "attention" ? "ATTENTION" : state ? "NORMAL" : "—";
+    const pulse = state?.pulse?.level === "critical" ? "CRITICAL" : state?.pulse?.level === "attention" ? "ATTENTION" : state ? "NORMAL" : "UNAVAILABLE";
 
     return {
       ...snapshot,

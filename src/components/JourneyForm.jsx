@@ -1,6 +1,6 @@
 import { ArrowRight, CircleDot, MapPin, Route, Info } from "lucide-react";
 
-function LocationField({ id, label, icon: Icon, iconClass, value, onChange, placeholder }) {
+function LocationField({ id, label, icon: Icon, iconClass, value, onChange }) {
   return (
     <div className="min-w-0">
       <label htmlFor={id} className="mb-1.5 block text-[10.5px] font-semibold tracking-[0.12em] text-muted">
@@ -13,7 +13,6 @@ function LocationField({ id, label, icon: Icon, iconClass, value, onChange, plac
           type="text"
           value={value}
           onChange={(event) => onChange(event.target.value)}
-          placeholder={placeholder}
           autoComplete="off"
           spellCheck={false}
           className="w-full rounded-lg border border-border bg-inset py-2.5 pl-10 pr-3 text-[16px] text-ink outline-none transition-all duration-200 placeholder:text-muted hover:border-line focus:border-cyan/50 focus:shadow-focus sm:text-sm"
@@ -52,22 +51,20 @@ export default function JourneyForm({
           iconClass="text-cyan-ink"
           value={from}
           onChange={onFromChange}
-          placeholder="Origin"
         />
         <ArrowRight size={16} className="mb-3 hidden text-muted md:block" aria-hidden="true" />
         <LocationField
           id="route-to"
           label="TO"
           icon={MapPin}
-          iconClass="text-violet"
+          iconClass="text-muted"
           value={to}
           onChange={onToChange}
-          placeholder="Destination"
         />
         <button
           type="submit"
           disabled={loading}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-action px-5 py-2.5 text-[13px] font-bold tracking-wide text-bg transition-all duration-200 hover:bg-action/90 active:scale-[0.98] md:w-auto"
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-action px-5 py-2.5 text-[13px] font-bold tracking-wide text-bg hover:bg-action/90 md:w-auto"
         >
           <Route size={15} strokeWidth={2.5} />
           {loading ? "SEARCHING…" : "ANALYZE ROUTES"}

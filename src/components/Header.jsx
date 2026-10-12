@@ -30,12 +30,12 @@ export default function Header({ title, description, onMenuClick, onPlaceSelect,
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
-          <div className="hidden items-center gap-1.5 rounded-full border border-attention/25 bg-attention/10 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-attention-ink sm:flex">
+          <div className="hidden items-center gap-1.5 rounded-md border border-attention/25 bg-attention/10 px-2.5 py-1 text-[11px] font-semibold tracking-wide text-attention-ink sm:flex">
             <span className="h-1.5 w-1.5 rounded-full bg-attention" />
             {loading && !state ? "CONNECTING" : dataMode}
           </div>
           <div className="hidden items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium text-muted md:flex">
-            <MapPin size={13} className="text-violet" />
+            <MapPin size={13} className="text-muted" />
             {selectedCity}
           </div>
           <ThemeToggle />

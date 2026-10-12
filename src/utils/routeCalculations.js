@@ -1,4 +1,4 @@
-// Route delay calculations — the single source of truth for delay, delay % and status.
+// Route delay calculations: the single source of truth for delay, delay % and status.
 //
 // currentTravelTime is the authoritative SIMULATED current ETA. Delay is derived only
 // from it and normalTravelTime; civic signals explain conditions and are never summed in.
@@ -15,10 +15,10 @@ export const DELAY_THRESHOLDS = [
 const UNAVAILABLE_STATUS = { status: "unavailable", label: "DATA INCOMPLETE", severity: null };
 
 export const DELAY_UNAVAILABLE_TEXT = "Delay unavailable";
-const EMPTY = "—";
+const EMPTY = "N/A";
 
-// Accepts finite numbers (and numeric strings). Anything else — null, undefined, NaN,
-// Infinity, "", "abc", negatives — is treated as missing.
+// Accepts finite numbers (and numeric strings). Anything else: null, undefined, NaN,
+// Infinity, "", "abc", negatives: is treated as missing.
 function toMinutes(value) {
   if (typeof value === "string" && value.trim() === "") return null;
   const number = typeof value === "string" ? Number(value) : value;
@@ -89,7 +89,7 @@ export function formatDelay(route) {
   return route.delay > 0 ? `+${roundTo(route.delay, 1)} min` : "0 min";
 }
 
-// "+28.6%", "0.0%" or "—". Expects a calculated route.
+// "+28.6%", "0.0%" or "N/A". Expects a calculated route.
 export function formatDelayPercent(route) {
   if (!route?.hasDelayData) return EMPTY;
   const rounded = roundTo(route.delayPercent, 1);
@@ -102,7 +102,7 @@ export function formatFasterNote(route) {
 }
 
 // Routes sharing the lowest valid current simulated ETA. Selection metric is
-// currentTravelTime ONLY — never delay, delay %, signals, distance or name.
+// currentTravelTime ONLY: never delay, delay %, signals, distance or name.
 // Returns { routes, minutes, isTie }; routes is [] when no route has a valid ETA.
 // Equal ETAs are all returned (isTie) rather than picking an arbitrary winner.
 export function getLowestEta(list = []) {

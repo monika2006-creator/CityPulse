@@ -5,7 +5,6 @@ import LowestEtaCard from "../components/LowestEtaCard.jsx";
 import RouteCard from "../components/RouteCard.jsx";
 import EtaComparison from "../components/EtaComparison.jsx";
 import RouteDetail from "../components/RouteDetail.jsx";
-import useMediaQuery from "../hooks/useMediaQuery.js";
 import { useCityPulseData, adaptRoutes, clock } from "../context/CityPulseDataContext.jsx";
 
 function mapRouteSignals(routeResult) {
@@ -35,10 +34,8 @@ export default function RouteIntelligence({ alertAction }) {
   const [routeAmenities, setRouteAmenities] = useState([]);
   const [amenitiesLoading, setAmenitiesLoading] = useState(false);
   const [amenitiesError, setAmenitiesError] = useState("");
-  const detailRef = useRef(null);
   const routeInputsInitialized = useRef(false);
   const prevCityRef = useRef(selectedCity);
-  const isTwoColumn = useMediaQuery("(min-width: 1280px)");
 
   useEffect(() => {
     if (prevCityRef.current !== selectedCity && routeResponse?.journey) {
@@ -124,12 +121,6 @@ export default function RouteIntelligence({ alertAction }) {
     }
   }, [routes, selectedRouteId, settings.trackedRouteId, updateSettings]);
 
-  useEffect(() => {
-    if (!selectedRouteId || isTwoColumn) return;
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    detailRef.current?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "nearest" });
-  }, [selectedRouteId, isTwoColumn]);
-
   const handleAnalyze = async (event) => {
     event.preventDefault();
     setNotice("");
@@ -172,7 +163,7 @@ export default function RouteIntelligence({ alertAction }) {
           <h2 className="text-xl font-bold uppercase tracking-tight text-ink">Route Intelligence</h2>
           <p className="mt-1 text-sm text-muted">TomTom live routes when place search and routing are available; otherwise the backend scenario is shown.</p>
         </div>
-        <div className="rounded-full border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-muted">
+        <div className="rounded-md border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-muted">
           {routeData?.source === "tomtom" ? "TOMTOM LIVE ROUTES" : dataMode}
         </div>
       </div>
@@ -200,7 +191,7 @@ export default function RouteIntelligence({ alertAction }) {
               </section>
               <EtaComparison routes={routes} lowestIds={lowestIds} />
             </div>
-            <div ref={detailRef} className="scroll-mt-44 xl:col-span-2">
+            <div className="xl:col-span-2">
               {selectedRoute ? <RouteDetail key={selectedRoute.id} route={selectedRoute} routes={routes} lowest={lowestEta}
                 signals={routeSignals} situations={situations} correlations={routeCorrelations} city={selectedCity}
                 amenities={routeAmenities} amenitiesLoading={amenitiesLoading} amenitiesError={amenitiesError} /> : (

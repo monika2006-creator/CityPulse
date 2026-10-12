@@ -1,4 +1,4 @@
-/* Live Civic Map — CityPulse styling for Leaflet.
+/* Live Civic Map: CityPulse styling for Leaflet.
    Every rule is scoped to .citypulse-map so Leaflet is untouched elsewhere.
    Imported after leaflet/dist/leaflet.css so these rules win. */
 
@@ -111,42 +111,22 @@
   background: rgb(var(--c-surface));
   border: 1.5px solid var(--cp-color);
   box-shadow: var(--map-marker-shadow);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  transition: none;
 }
 
 .cp-marker--critical .cp-marker__body {
   box-shadow: 0 0 8px -1px rgb(var(--c-critical) / 0.45), var(--map-marker-shadow);
 }
 
-.cp-marker__pulse {
-  position: absolute;
-  inset: 1px;
-  border-radius: 9999px;
-  border: 1.5px solid var(--cp-color);
-  opacity: 0;
-  animation: cp-pulse 2.4s ease-out infinite;
-}
-
-@keyframes cp-pulse {
-  0% {
-    transform: scale(1);
-    opacity: 0.55;
-  }
-  100% {
-    transform: scale(1.7);
-    opacity: 0;
-  }
-}
-
 .citypulse-map .cp-marker-icon:hover .cp-marker__body {
-  transform: scale(1.1);
+  transform: none;
 }
 
 /* Selected + keyboard focus: cyan ring (the live-data accent) */
 .citypulse-map .cp-marker-icon.is-selected .cp-marker__body,
 .citypulse-map .cp-marker-icon:focus-visible .cp-marker__body {
   box-shadow: 0 0 0 2px rgb(var(--map-marker-ring)), 0 0 0 4px rgb(var(--c-cyan)), var(--map-marker-shadow);
-  transform: scale(1.08);
+  transform: none;
 }
 
 .cp-sr-only {
@@ -210,13 +190,4 @@
 .citypulse-map .cp-popup a.leaflet-popup-close-button:focus-visible {
   outline: 2px solid rgb(var(--c-cyan));
   outline-offset: 1px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cp-marker__pulse {
-    animation: none;
-  }
-  .cp-marker__body {
-    transition: none;
-  }
 }

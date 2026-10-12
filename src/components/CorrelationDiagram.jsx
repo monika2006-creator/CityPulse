@@ -55,13 +55,13 @@ export default function CorrelationDiagram({ correlation, signals, routes, situa
               <Node
                 key={route.id}
                 icon={RouteIcon}
-                iconClass="text-violet"
+                iconClass="text-cyan-ink"
                 label={`Route: ${route.name}`}
                 detail={route.hasDelayData ? `${formatDelay(route)} · ${formatDelayPercent(route)}` : "Delay unavailable"}
               />
             ))}
             {linkedSituations.map((situation) => (
-              <Node key={situation.id} icon={Layers} iconClass="text-violet" label={`Situation: ${situation.title}`} detail={situation.id} />
+              <Node key={situation.id} icon={Layers} iconClass="text-cyan-ink" label={`Situation: ${situation.title}`} detail={situation.id} />
             ))}
           </div>
         </>

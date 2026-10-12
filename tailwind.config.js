@@ -2,7 +2,7 @@
 
 // Every colour is a CSS variable holding "R G B" channels (defined in src/index.css,
 // one set per theme). Tailwind fills in the alpha, so `bg-cyan/10` etc. keep working
-// and the whole UI switches theme by changing the variables — no per-component work.
+// and the whole UI switches theme by changing the variables, with no per-component work.
 const token = (name) => `rgb(var(--c-${name}) / <alpha-value>)`;
 
 // `ink` variants are the text-safe shade of an accent (darker in light mode so small
@@ -26,8 +26,7 @@ export default {
         cyan: accent("cyan"),
         primary: token("cyan"),
         action: token("action"),
-        violet: accent("violet"),
-        secondary: token("violet"),
+        secondary: token("action"),
         normal: accent("normal"),
         attention: accent("attention"),
         critical: accent("critical"),

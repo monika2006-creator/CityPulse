@@ -54,7 +54,7 @@ export default function RouteCard({ route, signals, isLowestEta, isTie, isSelect
         <div className="flex flex-wrap items-center gap-1.5">
           {isLowestEta && (
             <span className="rounded-md border border-cyan/30 bg-cyan/10 px-1.5 py-0.5 font-mono text-[10px] font-semibold tracking-wide text-cyan-ink">
-              LOWEST CURRENT ETA{isTie && " — TIE"}
+              LOWEST CURRENT ETA{isTie && " (TIE)"}
             </span>
           )}
           <RouteStatusBadge route={route} />
@@ -103,7 +103,7 @@ export default function RouteCard({ route, signals, isLowestEta, isTie, isSelect
           </p>
         )}
         <p className="mt-2 font-mono text-[10.5px] text-muted">
-          DISTANCE <span className="ml-1 font-medium text-ink">{route.distance ?? "—"}{route.distance != null && " km"}</span>
+          DISTANCE <span className="ml-1 font-medium text-ink">{route.distance ?? "N/A"}{route.distance != null && " km"}</span>
         </p>
       </div>
     </button>

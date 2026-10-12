@@ -15,7 +15,6 @@ function Metric({ icon: Icon, label, value, detail, tone = "cyan" }) {
   const colors = {
     cyan: "text-cyan-ink bg-cyan/10",
     critical: "text-critical-ink bg-critical/10",
-    violet: "text-violet-ink bg-violet/10",
     normal: "text-normal-ink bg-normal/10",
   };
   return (
@@ -63,7 +62,7 @@ function BriefPanel({ state, routeResponse, dataMode }) {
   const points = brief?.brief?.keyPoints ?? state?.signals?.slice(0, 3).map((signal) => `${signal.title} around ${signal.area}.`) ?? [];
   return (
     <aside className="flex min-h-[300px] min-w-0 flex-col rounded-xl border border-border bg-surface p-4 shadow-card xl:min-h-0">
-      <PanelTitle action={<span className="rounded-md bg-violet/10 px-2 py-1 text-[9px] font-bold tracking-wider text-violet-ink">{brief?.generatedBy === "gemini" ? "GEMINI" : "BACKEND"}</span>}>CITYPULSE BRIEF</PanelTitle>
+      <PanelTitle action={<span className="rounded-md bg-elevated px-2 py-1 text-[9px] font-bold tracking-wider text-muted">{brief?.generatedBy === "gemini" ? "GENERATED" : "RULE-BASED"}</span>}>CONDITIONS SUMMARY</PanelTitle>
       <div className="flex-1">
         <h3 className="text-base font-bold leading-snug text-ink">{brief?.brief?.headline ?? "Civic conditions in the current snapshot"}</h3>
         <p className="mt-2 text-xs leading-5 text-muted">{loadingBrief ? "Preparing a summary from the current backend snapshot…" : brief?.brief?.summary ?? state?.summary?.text ?? "No summary is available for this snapshot."}</p>
@@ -105,19 +104,19 @@ export default function Overview() {
           {dataMode !== "LIVE" && <span className="text-muted hidden sm:inline">(Advances +{settings.scenarioStepMin ?? 5}m every {settings.refreshIntervalMin ?? 5}m)</span>}
         </p>
         <div className="flex flex-wrap items-center gap-2">
-          <span className={`rounded-full px-2.5 py-1 text-[9px] font-bold tracking-wider ${pulseTone[pulse] ?? "text-muted bg-elevated"}`}><span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-current" />{pulse}</span>
-          <span className="rounded-full border border-border bg-surface px-2.5 py-1 text-[9px] font-bold tracking-wider text-muted">{dataMode}</span>
+          <span className={`rounded-md px-2.5 py-1 text-[9px] font-bold tracking-wider ${pulseTone[pulse] ?? "text-muted bg-elevated"}`}><span className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full bg-current" />{pulse}</span>
+          <span className="rounded-md border border-border bg-surface px-2.5 py-1 text-[9px] font-bold tracking-wider text-muted">{dataMode}</span>
           <button type="button" onClick={() => void refresh()} disabled={loading} className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-2.5 py-1.5 text-[10px] font-bold text-ink hover:border-cyan/50 disabled:opacity-50" aria-label="Refresh backend scenario snapshot">
-            <RefreshCw size={12} className={loading ? "animate-spin" : ""} /> REFRESH +5 MIN
+            <RefreshCw size={12} /> REFRESH +5 MIN
           </button>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4">
-        <Metric icon={Activity} label="Civic Pulse" value={pulse} detail={`${state.pulse?.situationCount ?? activeSituations.length} active situation${(state.pulse?.situationCount ?? activeSituations.length) === 1 ? "" : "s"}`} tone={pulse === "CRITICAL" ? "critical" : pulse === "ATTENTION" ? "violet" : "normal"} />
-        <Metric icon={AlertTriangle} label="Active Situations" value={String(activeSituations.length).padStart(2, "0")} detail={`${severityCounts.critical ?? 0} critical · ${severityCounts.high ?? 0} high · ${severityCounts.medium ?? 0} medium · ${severityCounts.low ?? 0} low`} tone="critical" />
-        <Metric icon={Radio} label="Signals" value={String(activeSignals.length).padStart(2, "0")} detail="Across traffic, weather, incidents" />
-        <Metric icon={MapPin} label="Monitored Areas" value={String(monitoredAreas).padStart(2, "0")} detail={`Configured ${selectedCity} zones`} tone="violet" />
+        <Metric icon={Activity} label="Civic Pulse" value={pulse} detail={`${state.pulse?.situationCount ?? activeSituations.length} active situation${(state.pulse?.situationCount ?? activeSituations.length) === 1 ? "" : "s"}`} tone={pulse === "CRITICAL" ? "critical" : pulse === "ATTENTION" ? "cyan" : "normal"} />
+        <Metric icon={AlertTriangle} label="Active Situations" value={String(activeSituations.length)} detail={`${severityCounts.critical ?? 0} critical · ${severityCounts.high ?? 0} high · ${severityCounts.medium ?? 0} medium · ${severityCounts.low ?? 0} low`} tone="critical" />
+        <Metric icon={Radio} label="Signals" value={String(activeSignals.length)} detail="Across traffic, weather, incidents" />
+        <Metric icon={MapPin} label="Monitored Areas" value={String(monitoredAreas)} detail={`${selectedCity} zones in this snapshot`} tone="cyan" />
       </div>
 
       <div className="overview-feature-grid">

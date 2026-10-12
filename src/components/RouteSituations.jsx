@@ -10,7 +10,7 @@ export default function RouteSituations({ route, situations }) {
   return (
     <div className="mt-3">
       <p className="flex items-center gap-1.5 text-[10.5px] font-semibold tracking-[0.1em] text-muted">
-        <Layers size={12} className="shrink-0 text-violet" aria-hidden="true" />
+        <Layers size={12} className="shrink-0 text-muted" aria-hidden="true" />
         RELATED SITUATION{related.length > 1 ? "S" : ""}
       </p>
       <ul className="mt-1 space-y-0.5 text-[13px] text-ink">

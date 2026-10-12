@@ -1,4 +1,4 @@
-// Signal correlation — deterministic, evidence-based, and deliberately modest.
+// Signal correlation: deterministic, evidence-based, and deliberately modest.
 //
 // A correlation says "these observed signals overlap in place and time". It NEVER says one
 // signal caused another, and it carries no confidence percentage: strength is described by
@@ -48,7 +48,7 @@ const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 const pad = (n) => String(n).padStart(2, "0");
 const clock = (seconds) => `${pad(Math.floor(seconds / 3600))}:${pad(Math.floor((seconds % 3600) / 60))}`;
 
-// "Traffic, incident and transit" — first word capitalised, the rest lower-case.
+// "Traffic, incident and transit": first word capitalised, the rest lower-case.
 const categoryPhrase = (categories) => {
   const cats = categories.map((type) => categoryLabel(type).toLowerCase());
   const text = joinList(cats);

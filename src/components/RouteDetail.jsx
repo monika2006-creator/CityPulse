@@ -33,7 +33,7 @@ function SectionTitle({ children, icon: Icon, iconClass = "text-cyan-ink" }) {
   );
 }
 
-// One civic signal linked to the route. Shows the signal's OWN reading and change —
+// One civic signal linked to the route. Shows the signal's own reading and change.
 // signals explain the route's condition, they are not summed into its ETA.
 function RouteSignalItem({ signal }) {
   const sev = SEVERITY_STYLES[signal.severity] ?? SEVERITY_STYLES.normal;
@@ -127,7 +127,7 @@ export default function RouteDetail({ route, routes, lowest, signals, situations
         <div className="flex flex-wrap items-center gap-1.5">
           {isLowest && (
             <span className="rounded-md border border-cyan/30 bg-cyan/10 px-1.5 py-0.5 font-mono text-[10px] font-semibold tracking-wide text-cyan-ink">
-              LOWEST CURRENT ETA{lowest.isTie && " — TIE"}
+              LOWEST CURRENT ETA{lowest.isTie && " (TIE)"}
             </span>
           )}
           <RouteStatusBadge route={route} />
@@ -159,7 +159,7 @@ export default function RouteDetail({ route, routes, lowest, signals, situations
         </div>
         {formatFasterNote(route) && <p className="mt-3 font-mono text-[11px] text-muted">{formatFasterNote(route)}</p>}
         <p className="mt-3 font-mono text-[10.5px] text-muted">
-          DISTANCE <span className="ml-1 font-medium text-ink">{route.distance != null ? `${route.distance} km` : "—"}</span>
+          DISTANCE <span className="ml-1 font-medium text-ink">{route.distance != null ? `${route.distance} km` : "N/A"}</span>
         </p>
       </div>
 
@@ -185,7 +185,7 @@ export default function RouteDetail({ route, routes, lowest, signals, situations
       </div>
 
       <div className="mt-6 border-t border-border pt-5">
-        <SectionTitle icon={Lightbulb} iconClass="text-violet">
+        <SectionTitle icon={Lightbulb} iconClass="text-cyan-ink">
           ROUTE CONDITIONS
         </SectionTitle>
         <p className="mt-2.5 text-[13px] leading-relaxed text-muted">

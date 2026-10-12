@@ -1,4 +1,4 @@
-// CityPulse signal detection engine — deterministic and rule-based.
+// CityPulse signal detection engine: deterministic and rule-based.
 //
 // A SIGNAL is one observation (signals.js). A SITUATION is a meaningful
 // combination of signals that appear close together in space and time.
@@ -91,7 +91,7 @@ const formatClock = (seconds) => {
 };
 
 // ---------------------------------------------------------------------------
-// Step 1 — keep only usable, abnormal signals
+// Step 1: keep only usable, abnormal signals
 // ---------------------------------------------------------------------------
 
 // Normal-severity signals describe baseline conditions, so they never form a situation.
@@ -111,7 +111,7 @@ function collectEvidence(signals) {
 }
 
 // ---------------------------------------------------------------------------
-// Step 2 — group signals that are close in space AND time
+// Step 2: group signals that are close in space AND time
 // ---------------------------------------------------------------------------
 
 // Two signals are linked when they are within `nearbyKm` and `windowMinutes` of each other.
@@ -139,7 +139,7 @@ function clusterSignals(evidence, config) {
 }
 
 // ---------------------------------------------------------------------------
-// Step 3 — rules
+// Step 3: rules
 // ---------------------------------------------------------------------------
 // `title` is the rule's output statement; `reason` says what was observed, in hedged
 // language (no causality). Each rule receives the signals of one cluster that no earlier rule has used,
@@ -199,7 +199,7 @@ const RULE_ORDER = ["traffic-disruption", "air-quality-concern", "transit-disrup
 const orderedRules = RULE_ORDER.map((id) => RULES.find((rule) => rule.id === id));
 
 // ---------------------------------------------------------------------------
-// Step 4 — confidence, severity, wording
+// Step 4: confidence, severity, wording
 // ---------------------------------------------------------------------------
 
 // Simple, additive and fully shown to the user:

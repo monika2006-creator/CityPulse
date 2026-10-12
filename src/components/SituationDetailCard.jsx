@@ -63,7 +63,7 @@ export default function SituationDetailCard({ situation, signals = [] }) {
 
         <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted">
           <span className="flex items-center gap-1.5">
-            <MapPin size={12} className="shrink-0 text-violet" />
+            <MapPin size={12} className="shrink-0 text-muted" />
             <span className="font-medium text-ink">{situation.area}</span>
             {nearbyCount > 0 && <span>+ {nearbyCount} nearby</span>}
           </span>
@@ -91,7 +91,7 @@ export default function SituationDetailCard({ situation, signals = [] }) {
 
       <div className="border-t border-border bg-elevated/50 p-5 xl:col-span-3 xl:border-l xl:border-t-0">
         <h4 className="flex items-center gap-2 text-[11px] font-bold tracking-[0.12em] text-ink">
-          <Lightbulb size={13} className="text-violet" />
+          <Lightbulb size={13} className="text-cyan-ink" />
           WHY THIS WAS DETECTED
         </h4>
         <p className="mt-2 text-[13px] leading-relaxed text-muted">{situation.whyDetected}</p>

@@ -5,7 +5,7 @@
 /* Fonts (Manrope + JetBrains Mono) are loaded once, from index.html. */
 
 /* ---------------------------------------------------------------------------
-   Theme tokens — the single source of truth for both themes.
+   Theme tokens: the single source of truth for both themes.
    Colours are "R G B" channels so Tailwind can apply opacity (bg-cyan/10).
    Dark is the default; light applies when <html data-theme="light">.
    --------------------------------------------------------------------------- */
@@ -29,8 +29,6 @@
   --c-cyan: 34 211 238; /* #22D3EE  live data */
   --c-cyan-ink: 34 211 238;
   --c-action: 59 130 246; /* #3B82F6  actions */
-  --c-violet: 139 92 246; /* #8B5CF6  intelligence */
-  --c-violet-ink: 167 139 250; /* #A78BFA */
 
   /* severity */
   --c-normal: 52 211 153; /* #34D399 */
@@ -51,9 +49,7 @@
   --scrim: rgb(0 0 0 / 0.7);
 
   /* page backdrop and decorative grid */
-  --page-glow: radial-gradient(circle at 75% 10%, rgb(var(--c-cyan) / 0.07), transparent 30%);
   --grid-line: rgb(var(--c-border) / 0.6);
-  --panel-glow: radial-gradient(circle at center, rgb(var(--c-cyan) / 0.09), transparent 55%);
 
   /* scrollbar */
   --scroll-thumb: 30 41 59;
@@ -78,13 +74,11 @@
   --c-line: 203 213 225; /* #CBD5E1 */
 
   --c-ink: 15 23 42; /* #0F172A */
-  --c-muted: 94 110 133; /* #5E6E85 — spec #64748B darkened slightly so muted text passes AA on elevated surfaces */
+  --c-muted: 94 110 133; /* #5E6E85: spec #64748B darkened slightly so muted text passes AA on elevated surfaces */
 
   --c-cyan: 8 145 178; /* #0891B2 */
   --c-cyan-ink: 14 116 144; /* #0E7490 */
   --c-action: 37 99 235; /* #2563EB */
-  --c-violet: 124 58 237; /* #7C3AED */
-  --c-violet-ink: 109 40 217; /* #6D28D9 */
 
   --c-normal: 5 150 105; /* #059669 */
   --c-normal-ink: 4 120 87; /* #047857 */
@@ -102,9 +96,7 @@
   --shadow-dot: none;
   --scrim: rgb(15 23 42 / 0.45);
 
-  --page-glow: none;
   --grid-line: rgb(var(--c-border) / 0.9);
-  --panel-glow: radial-gradient(circle at center, rgb(var(--c-cyan) / 0.07), transparent 55%);
 
   --scroll-thumb: 203 213 225;
   --scroll-thumb-hover: 178 190 205;
@@ -136,8 +128,6 @@ body {
   margin: 0;
   min-height: 100vh;
   background-color: rgb(var(--c-bg));
-  background-image: var(--page-glow);
-  background-attachment: fixed;
   color: rgb(var(--c-ink));
   font-family: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
@@ -157,18 +147,6 @@ canvas {
 .tabular {
   font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-variant-numeric: tabular-nums;
-}
-
-/* Decorative panels (Overview placeholder) */
-.cp-grid-bg {
-  background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-  background-size: 28px 28px;
-  background-position: center;
-}
-
-.cp-panel-glow {
-  background: var(--panel-glow);
 }
 
 .overview-feature-grid {
@@ -212,22 +190,4 @@ canvas {
   outline: 2px solid rgb(var(--c-cyan));
   outline-offset: 2px;
   border-radius: 6px;
-}
-
-/* Theme switch: for ~250 ms after the toggle, colours ease instead of snapping.
-   Added by ThemeProvider only on a user toggle — never on load, and never on hover,
-   so it cannot interfere with the components' own transitions. */
-:root[data-theme-switching] *,
-:root[data-theme-switching] *::before,
-:root[data-theme-switching] *::after {
-  transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease,
-    fill 200ms ease, stroke 200ms ease, box-shadow 200ms ease !important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  :root[data-theme-switching] *,
-  :root[data-theme-switching] *::before,
-  :root[data-theme-switching] *::after {
-    transition: none !important;
-  }
 }

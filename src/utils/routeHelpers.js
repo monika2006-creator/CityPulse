@@ -15,7 +15,7 @@ export function getRouteSignals(route, signals) {
 }
 
 // Active situations (Step 8 engine output) that were detected from at least one of the
-// route's signals. Purely a lookup — no new detection, and no claim of causality.
+// route's signals. Purely a lookup: no new detection, and no claim of causality.
 export function getRouteSituations(route, situations) {
   const ids = new Set(route.signalIds ?? []);
   return situations.filter(

@@ -142,7 +142,7 @@ function amenityIcon(type) {
 }
 
 /**
- * Interactive civic map. Renders whatever `signals` it is given — it owns no signal data.
+ * Interactive civic map. Renders the supplied signals and owns no signal data.
  *
  * Props
  *  - signals:      array from signals.js (already filtered by the page)

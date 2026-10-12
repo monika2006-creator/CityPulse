@@ -125,7 +125,7 @@ export default function LiveMap({ searchedPlace, alertAction }) {
           <h2 className="text-xl font-bold uppercase tracking-tight text-ink">Live City Map</h2>
           <p className="mt-1 text-sm text-muted">Monitor civic signals across {selectedCity}; live data is labeled by its provider.</p>
         </div>
-        <div className="flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1.5 text-xs text-muted">
+        <div className="flex items-center gap-2 rounded-md border border-border bg-surface px-3 py-1.5 text-xs text-muted">
           <span className="h-1.5 w-1.5 rounded-full bg-muted" />
           <span className="font-semibold tracking-wide">{dataMode}</span>
         </div>
