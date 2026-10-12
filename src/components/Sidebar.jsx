@@ -95,7 +95,7 @@ export default function Sidebar({
       >
         {/* Logo / brand */}
         <div className="flex items-center justify-between px-5 pb-5 pt-6">
-          <div className="flex items-center gap-2.5">
+          <button type="button" onClick={() => handleSelect("overview")} aria-label="CityPulse home" className="flex min-w-0 items-center gap-2.5 rounded-md text-left">
             <span className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-elevated">
               <Radio size={17} className="text-cyan-ink" strokeWidth={2.25} />
               <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-cyan shadow-dot" />
@@ -106,7 +106,7 @@ export default function Sidebar({
                 CIVIC INTELLIGENCE
               </p>
             </div>
-          </div>
+          </button>
           <button
             type="button"
             onClick={onClose}

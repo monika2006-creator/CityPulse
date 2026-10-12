@@ -1,7 +1,6 @@
 import './env.js';
 import express from 'express';
 import { GEMINI_API_KEY, TOMTOM_KEY } from './env.js';
-import cors from 'cors';
 import { generate, META } from './sim.js';
 import { CITIES as CITY_CONFIGS } from './zones.js';
 import { buildIndex, computeState } from './engine.js';
@@ -30,8 +29,16 @@ export function stateAt(tMs, cityId = 'jaipur') {
 }
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+export default app;
+app.use((_req, res, next) => {
+  res.set({
+    'X-Content-Type-Options': 'nosniff',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+    'X-Frame-Options': 'DENY',
+  });
+  next();
+});
+app.use(express.json({ limit: '64kb' }));
 
 app.get('/', (_req, res) => res.json({ name: 'CityPulse API', status: 'running', endpoints: ['/api/health', '/api/state', '/api/feeds'] }));
 app.get('/api/health', (_req, res) => res.json({ ok: true, mode: 'scenario', tomtomKey: !!TOMTOM_KEY(), weatherProvider: 'Open-Meteo', tomtomCallsToday: calls.n, cities: Object.values(CITY_CONFIGS).map(({ id, name }) => ({ id, name })) }));
@@ -200,11 +207,6 @@ app.post('/api/amenities', async (req, res) => {
 });
 
 app.get('/api/feeds', (_req, res) => res.json([...['weather', 'traffic', 'incident']].map((id) => ({ id, enabled: !off.has(id) }))));
-app.post('/api/feeds/:id', (req, res) => { // body: { "enabled": false }
-  if (!['weather', 'traffic', 'incident'].includes(req.params.id)) return res.status(404).json({ error: 'unknown feed' });
-  req.body?.enabled === false ? off.add(req.params.id) : off.delete(req.params.id);
-  res.json({ id: req.params.id, enabled: !off.has(req.params.id) });
-});
 
 if (process.argv[1]?.endsWith('index.js')) {
   const port = process.env.PORT || 8787;

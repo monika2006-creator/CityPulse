@@ -135,7 +135,7 @@ export default function LiveMap({ searchedPlace, alertAction }) {
         <div
           role="group"
           aria-label="Filter signals by category"
-          className="flex gap-2 overflow-x-auto pb-1 lg:pb-0"
+          className="flex flex-wrap gap-2 pb-1 lg:pb-0"
         >
           <FilterChip
             label="ALL"

@@ -4,3 +4,5 @@ dist
 *.local
 .env
 /citypulse\ /
+.vercel
+.env*

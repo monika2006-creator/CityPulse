@@ -120,7 +120,7 @@ export default function NotificationCenter({ isOpen, onClose, onNavigate }) {
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-1 overflow-x-auto border-b border-border px-3 py-2 scrollbar-none">
+      <div className="flex flex-wrap items-center gap-1 border-b border-border px-3 py-2">
         {CATEGORY_TABS.map((tab) => {
           const isActive = activeTab === tab.id;
           const count =

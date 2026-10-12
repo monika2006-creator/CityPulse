@@ -97,6 +97,10 @@ export default function Layout({ currentPage, setCurrentPage, onPlaceSelect, onN
         <div className="flex-1 overflow-y-auto px-5 py-6 sm:px-8 sm:py-8">
           {children}
         </div>
+        <footer className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-border px-5 py-4 text-xs text-muted sm:px-8">
+          <span>© {new Date().getFullYear()} CityPulse</span>
+          <a href="https://github.com/monika2006-creator/CityPulse" target="_blank" rel="noopener noreferrer" className="rounded text-muted underline-offset-4 hover:text-ink hover:underline">Project on GitHub</a>
+        </footer>
       </main>
     </div>
   );
